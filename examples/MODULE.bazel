@@ -1,0 +1,90 @@
+module(
+    name = "cargo_env_examples",
+    version = "0.0.0",
+)
+
+bazel_dep(name = "cargo_env.bzl")
+local_path_override(
+    module_name = "cargo_env.bzl",
+    path = "..",
+)
+
+# keep-sorted start
+bazel_dep(name = "bazel_env.bzl", version = "0.5.0")
+bazel_dep(name = "bazelrc-preset.bzl", version = "1.8.0")
+bazel_dep(name = "openssl", version = "3.5.4.bcr.0")
+bazel_dep(name = "rules_rust", version = "0.68.1")
+bazel_dep(name = "toolchains_llvm", version = "1.6.0")
+bazel_dep(name = "zstd", version = "1.5.7")
+# keep-sorted end
+
+# LLVM version config
+# kernel.org slim toolchain: https://mirrors.kernel.org/pub/tools/llvm/files/
+_LLVM_VERSION = "21.1.6"
+
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(
+    llvm_version = _LLVM_VERSION,
+    sha256 = {
+        "linux-aarch64": "4b9c6d122450e39f9ce3e29df8a8efc54727e663145dda6bd5ab765eaf09fa32",
+        "linux-x86_64": "1adb2ef87c6b7ed6a4c37b507cb18046be521d809fd9db4359a3592d7265f389",
+    },
+    strip_prefix = {
+        "linux-aarch64": "llvm-{}-aarch64".format(_LLVM_VERSION),
+        "linux-x86_64": "llvm-{}-x86_64".format(_LLVM_VERSION),
+    },
+    urls = {
+        # Slimmer toolchains of clang than the defaults.
+        "linux-aarch64": ["https://mirrors.kernel.org/pub/tools/llvm/files/llvm-{}-aarch64.tar.xz".format(_LLVM_VERSION)],
+        "linux-x86_64": ["https://mirrors.kernel.org/pub/tools/llvm/files/llvm-{}-x86_64.tar.xz".format(_LLVM_VERSION)],
+        # darwin (macOS): no override, uses default github.com/llvm/llvm-project releases
+    },
+)
+use_repo(llvm, "llvm_toolchain_llvm")
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2024",
+    rustfmt_version = "1.91.0",
+    versions = ["1.91.0"],
+)
+use_repo(rust, "rust_toolchains")
+
+crate = use_extension(
+    "@rules_rust//crate_universe:extension.bzl",
+    "crate",
+)
+crate.annotation_select(
+    build_script_data = [
+        "@openssl//:gen_dir",
+    ],
+    build_script_env = {"OPENSSL_DIR": "$(execpath @openssl//:gen_dir)"},
+    crate = "openssl-sys",
+    repositories = ["crates"],
+    triples = [
+        "x86_64-unknown-linux-gnu",
+        "aarch64-unknown-linux-gnu",
+    ],
+)
+crate.annotation(
+    crate = "zstd-sys",
+    gen_build_script = "off",
+    repositories = ["crates"],
+    deps = [
+        "@zstd",
+    ],
+)
+crate.from_cargo(
+    cargo_lockfile = "//:Cargo.lock",
+    manifests = [
+        "//:Cargo.toml",
+    ],
+    supported_platform_triples = [
+        "x86_64-unknown-linux-gnu",
+        "aarch64-apple-darwin",
+        "aarch64-unknown-linux-gnu",
+    ],
+)
+use_repo(crate, "crates")
+
+inject_repo(crate, "openssl", "zstd")

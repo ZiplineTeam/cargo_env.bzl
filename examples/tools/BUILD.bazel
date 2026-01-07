@@ -1,0 +1,28 @@
+load("@bazel_env.bzl", "bazel_env")
+load("@bazelrc-preset.bzl", "bazelrc_preset")
+load("@cargo_env.bzl", "cargo_env")
+
+bazelrc_preset(
+    name = "preset",
+    doc_link_template = "https://registry.build/flag/bazel?filter={flag}",
+)
+
+bazel_env(
+    name = "bazel_env",
+    tools = {
+        "cargo": "@rules_rust//tools/upstream_wrapper:cargo",
+        "rustc": "@rules_rust//tools/upstream_wrapper:rustc",
+        "rustdoc": "@rules_rust//tools/upstream_wrapper:rustdoc",
+        "rustfmt": "@rules_rust//tools/upstream_wrapper:rustfmt",
+    },
+)
+
+cargo_env(
+    name = "cargo_env",
+    clang = "@llvm_toolchain_llvm//:bin/clang",
+    include_directories = [],
+    libclang = "@llvm_toolchain_llvm//:lib/libclang.so",
+    openssl_dir = "@openssl//:gen_dir",
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+)

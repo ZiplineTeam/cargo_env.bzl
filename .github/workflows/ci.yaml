@@ -1,12 +1,9 @@
 name: CI
-# Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
   push:
     branches: [main]
   pull_request:
     branches: [main]
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 concurrency:
   # Cancel previous actions from the same PR or branch except 'main' branch.
@@ -15,22 +12,29 @@ concurrency:
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 jobs:
   test:
-    uses: bazel-contrib/.github/.github/workflows/bazel.yaml@v6
-    with:
-      folders: |
-        [
-          ".",
-          "e2e/smoke"
-        ]
-      exclude: |
-        [
-          {"folder": ".", "bzlmodEnabled": false},
-          {"folder": ".", "bazelVersion": "6.4.0"}
-        ]
+    strategy:
+      fail-fast: false
+      matrix:
+        bazelversion: ["7.6.1", "8.5.0"]
+        folders: [".", "examples"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - name: Configure Bazel version
+        run: |
+          echo "${{ matrix.bazelversion }}" > .bazelversion
+          bazel version
+      - name: Setup Bazel
+        uses: bazel-contrib/setup-bazel@43d7d5ceab59a307da44fc7585faa2a2fff4f88d # 0.16.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+      - run: bazel test --config=ci //...
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: pre-commit/action@v3.0.1
   # For branch protection settings, this job provides a "stable" name that can be used to gate PR merges
   # on "all matrix jobs were successful".

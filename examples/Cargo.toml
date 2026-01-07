@@ -1,0 +1,8 @@
+[dependencies]
+openssl = "0.10"
+zstd = "0.13"
+
+[package]
+name = "cargo_env_examples"
+version = "0.1.0"
+edition = "2024"

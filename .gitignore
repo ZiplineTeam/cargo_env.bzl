@@ -1,4 +1,7 @@
+target
 bazel-*
 .bazelrc.user
 .idea/
 .ijwb/
+
+.envrc.cargo

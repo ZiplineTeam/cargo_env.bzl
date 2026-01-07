@@ -1,11 +1,11 @@
 bcr_test_module:
-  module_path: "e2e/smoke"
+  module_path: "examples"
   matrix:
     platform: ["debian11", "macos", "ubuntu2204", "windows"]
-    bazel: ["8.x", "7.x", "6.x"]
+    bazel: ["8.x", "7.x"]
   tasks:
     run_tests:
-      name: "Run test module"
+      name: "Run tests on examples module"
       platform: ${{ platform }}
       bazel: ${{ bazel }}
       test_targets:

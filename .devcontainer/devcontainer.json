@@ -1,17 +1,43 @@
 {
-  "build": {
-    // instructs devcontainers to use a Dockerfile
-    // rather than a pre-defined image
-    "dockerfile": "Dockerfile"
-  },
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-azuretools.vscode-docker", // docker support
-        "BazelBuild.vscode-bazel" // bazel support
-      ]
-    }
-  },
-  // sets up pre-commit hooks
-  "postStartCommand": "pre-commit install"
+    "name": "Bazel Development Environment",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+    "mounts": [
+        "source=bazel-cache,target=/home/vscode/.cache/bazel,type=volume",
+        "source=bazelisk-cache,target=/home/vscode/.cache/bazelisk,type=volume",
+        "source=pre-commit-cache,target=/home/vscode/.cache/pre-commit,type=volume"
+    ],
+    "onCreateCommand": "./.devcontainer/on_create.sh",
+    "postCreateCommand": "./.devcontainer/post_create.sh",
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "installZsh": true,
+            "configureZshAsDefaultShell": true,
+            "installOhMyZsh": false,
+            "installOhMyZshConfig": false
+            // Get your own dotfiles configured with
+            // https://code.visualstudio.com/docs/devcontainers/containers#_personalizing-with-dotfile-repositories
+        },
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers-community/features/bazel:1": {
+            "bazelisk_version": "v1.26.0",
+            "buildifier_version": "v8.2.0"
+        },
+        "ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
+            "upgradePackages": true,
+            "packages": [
+                "direnv"
+            ]
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "BazelBuild.vscode-bazel",
+                "eamodio.gitlens",
+                "llvm-vs-code-extensions.vscode-clangd",
+                "ms-vscode.cpptools-extension-pack",
+                "yzhang.markdown-all-in-one"
+            ],
+        }
+    },
 }

@@ -1,0 +1,21 @@
+load("@crates//:defs.bzl", "all_crate_deps")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
+
+rust_library(
+    name = "cargo_env_examples",
+    srcs = ["src/lib.rs"],
+    deps = all_crate_deps(normal = True),
+)
+
+rust_binary(
+    name = "main",
+    srcs = ["src/main.rs"],
+    deps = [
+        ":cargo_env_examples",
+    ],
+)
+
+rust_test(
+    name = "cargo_env_examples_test",
+    crate = ":cargo_env_examples",
+)

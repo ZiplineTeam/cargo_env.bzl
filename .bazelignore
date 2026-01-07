@@ -1,1 +1,2 @@
-e2e/
+examples
+bazel-cargo_env.bzl  # Bazel symlink folder ending with .bzl causes issues
