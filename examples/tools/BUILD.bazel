@@ -20,7 +20,9 @@ bazel_env(
 cargo_env(
     name = "cargo_env",
     clang = "@llvm_toolchain_llvm//:bin/clang",
-    include_directories = [],
+    include_directories = [
+        "@openssl//:ssl",
+    ],
     libclang = "@llvm_toolchain_llvm//:lib/libclang.so",
     openssl_dir = "@openssl//:gen_dir",
     tags = ["manual"],
