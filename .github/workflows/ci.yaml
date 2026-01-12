@@ -24,6 +24,11 @@ jobs:
         run: |
           echo "${{ matrix.bazelversion }}" > .bazelversion
           bazel version
+      - name: Update lockfile
+        run: |
+          if [ "${{ matrix.bazelversion }}" != "$(cat .bazelversion)" ]; then
+            bazel mod deps --lockfile_mode=update
+          fi
       - name: Setup Bazel
         uses: bazel-contrib/setup-bazel@43d7d5ceab59a307da44fc7585faa2a2fff4f88d # 0.16.0
         with:
