@@ -21,21 +21,23 @@ jobs:
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - name: Configure Bazel version
+        id: bazel-version
         run: |
+          echo "original=$(cat .bazelversion)" >> "$GITHUB_OUTPUT"
           echo "${{ matrix.bazelversion }}" > .bazelversion
           bazel version
-      - name: Update lockfile
-        run: |
-          if [ "${{ matrix.bazelversion }}" != "$(cat .bazelversion)" ]; then
-            bazel mod deps --lockfile_mode=update
-          fi
       - name: Setup Bazel
         uses: bazel-contrib/setup-bazel@43d7d5ceab59a307da44fc7585faa2a2fff4f88d # 0.16.0
         with:
           bazelisk-cache: true
           disk-cache: ${{ github.workflow }}
           repository-cache: true
-      - run: bazel test --config=ci //...
+      - run: |
+          if [ "${{ matrix.bazelversion }}" != "${{ steps.bazel-version.outputs.original }}" ]; then
+            bazel mod deps --lockfile_mode=update
+            bazel run //tools:preset.update
+          fi
+          bazel test --config=ci //...
   pre-commit:
     runs-on: ubuntu-latest
     steps:

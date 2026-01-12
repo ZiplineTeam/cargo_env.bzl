@@ -18,6 +18,7 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-illegal-windows-names
       - id: check-json
+        exclude: ".devcontainer/devcontainer.json"
       - id: check-merge-conflict
       - id: check-shebang-scripts-are-executable
       - id: check-toml
