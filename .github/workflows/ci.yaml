@@ -33,11 +33,14 @@ jobs:
           disk-cache: ${{ github.workflow }}
           repository-cache: true
       - run: |
-          if [ "${{ matrix.bazelversion }}" != "${{ steps.bazel-version.outputs.original }}" ]; then
+          if [ "$MATRIX_BAZELVERSION" != "$ORIGINAL_BAZELVERSION" ]; then
             bazel mod deps --lockfile_mode=update
             bazel run //tools:preset.update
           fi
           bazel test --config=ci //...
+        env:
+          MATRIX_BAZELVERSION: ${{ matrix.bazelversion }}
+          ORIGINAL_BAZELVERSION: ${{ steps.bazel-version.outputs.original }}
   pre-commit:
     runs-on: ubuntu-latest
     steps:
