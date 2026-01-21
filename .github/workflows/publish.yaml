@@ -27,14 +27,14 @@ jobs:
           app-id: ${{ secrets.ZIPLINE_BOT_APP_ID }}
           private-key: ${{ secrets.ZIPLINE_BOT_PRIVATE_KEY }}
           permission-contents: write
-          repositories: ZiplineTeam/bazel-central-registry
+          repositories: bazel-central-registry
   publish:
     needs: generate-token
     uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.1.0
     with:
       tag_name: ${{ inputs.tag_name }}
       # GitHub repository which is a fork of the upstream where the Pull Request will be opened.
-      registry_fork: bazel-central-registry
+      registry_fork: ZiplineTeam/bazel-central-registry
       draft: false
     permissions:
       attestations: write
