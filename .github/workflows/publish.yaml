@@ -15,6 +15,7 @@ on:
         description: git tag being released
         required: true
         type: string
+
 jobs:
   generate-token:
     runs-on: ubuntu-latest
@@ -28,6 +29,9 @@ jobs:
           private-key: ${{ secrets.ZIPLINE_BOT_PRIVATE_KEY }}
           permission-contents: write
           repositories: bazel-central-registry
+          # since this is being fed as the input in a separate job, we can have this be revoked
+          # TODO: see if we can re-org this somewhat
+          skip-revoke-token: true
   publish:
     needs: generate-token
     uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.1.0
