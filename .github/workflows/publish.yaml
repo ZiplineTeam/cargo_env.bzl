@@ -26,6 +26,8 @@ jobs:
         with:
           app-id: ${{ secrets.ZIPLINE_BOT_APP_ID }}
           private-key: ${{ secrets.ZIPLINE_BOT_PRIVATE_KEY }}
+          permission-contents: write
+          repositories: ZiplineTeam/bazel-central-registry          
   publish:
     needs: generate-token
     uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.1.0
