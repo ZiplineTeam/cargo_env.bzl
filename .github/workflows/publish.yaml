@@ -7,9 +7,6 @@ on:
       tag_name:
         required: true
         type: string
-    secrets:
-      BCR_PUBLISH_TOKEN:
-        required: true
   # In case of problems, let release engineers retry by manually dispatching
   # the workflow from the GitHub UI
   workflow_dispatch:
@@ -19,7 +16,18 @@ on:
         required: true
         type: string
 jobs:
+  generate-token:
+    runs-on: ubuntu-latest
+    outputs:
+      token: ${{ steps.generate-token.outputs.token }}
+    steps:
+      - id: generate-token
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf
+        with:
+          app-id: ${{ secrets.ZIPLINE_BOT_APP_ID }}
+          private-key: ${{ secrets.ZIPLINE_BOT_PRIVATE_KEY }}
   publish:
+    needs: generate-token
     uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.1.0
     with:
       tag_name: ${{ inputs.tag_name }}
@@ -32,4 +40,4 @@ jobs:
       id-token: write
     secrets:
       # Necessary to push to the BCR fork, and to open a pull request against a registry
-      publish_token: ${{ secrets.BCR_PUBLISH_TOKEN }}
+      publish_token: ${{ needs.generate-token.outputs.token }}
