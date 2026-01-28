@@ -40,6 +40,7 @@ jobs:
       # GitHub repository which is a fork of the upstream where the Pull Request will be opened.
       registry_fork: ZiplineTeam/bazel-central-registry
       draft: false
+      author_email: acme-google-contributors@flyzipline.com
     permissions:
       attestations: write
       contents: write
