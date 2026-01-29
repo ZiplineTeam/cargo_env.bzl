@@ -49,16 +49,16 @@ repos:
       - id: toml-sort-fix
         exclude: "\\.lock$"
   - repo: https://github.com/google/yamlfmt
-    rev: v0.20.0
+    rev: v0.21.0
     hooks:
       - id: yamlfmt
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.37.1
+    rev: v1.38.0
     hooks:
       - id: yamllint
         args: [--strict]
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.36.0
+    rev: 0.36.1
     hooks:
       - id: check-github-workflows
   - repo: https://github.com/Mateusz-Grzelinski/actionlint-py
@@ -67,7 +67,7 @@ repos:
       - id: actionlint
         additional_dependencies: [pyflakes>=3.1.0, shellcheck-py>=0.9.0.5]
   - repo: https://github.com/crate-ci/typos
-    rev: v1.42.0
+    rev: v1.42.3
     hooks:
       - id: typos
         exclude_types:
@@ -99,7 +99,7 @@ repos:
       - id: buildifier-lint
         args: [--version, "v8.2.1"]
   - repo: https://github.com/hofbi/dev-tools
-    rev: 1.0.0
+    rev: 1.2.0
     hooks:
       - id: check-build-file-without-extensions
       - id: check-non-existing-and-duplicate-excludes
