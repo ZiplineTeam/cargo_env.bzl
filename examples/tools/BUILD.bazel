@@ -1,28 +1,44 @@
 load("@bazel_env.bzl", "bazel_env")
 load("@bazelrc-preset.bzl", "bazelrc_preset")
-load("@cargo_env.bzl", "cargo_env")
+load("@cargo_env.bzl", "cargo_env", "env_wrapper")
 
 bazelrc_preset(
     name = "preset",
     doc_link_template = "https://registry.build/flag/bazel?filter={flag}",
 )
 
-bazel_env(
-    name = "bazel_env",
-    tools = {
-        "cargo": "@rules_rust//tools/upstream_wrapper:cargo",
-        "rustc": "@rules_rust//tools/upstream_wrapper:rustc",
-        "rustdoc": "@rules_rust//tools/upstream_wrapper:rustdoc",
-        "rustfmt": "@rules_rust//tools/upstream_wrapper:rustfmt",
-    },
-)
-
+# Make bazel managed dependencies available as environment variables for manual usage and local development
 cargo_env(
     name = "cargo_env",
     clang = "@llvm_toolchain_llvm//:bin/clang",
-    include_directories = [],
-    libclang = "@llvm_toolchain_llvm//:lib/libclang.so",
+    # libclang = "@llvm_toolchain_llvm//:lib/libclang.so",  # TODO: does not work on Mac yet
     openssl_dir = "@openssl//:gen_dir",
     tags = ["manual"],
-    visibility = ["//visibility:public"],
+)
+
+# Wrap cargo binary with access to the environment variables
+env_wrapper(
+    name = "cargo",
+    binary = "@rules_rust//tools/upstream_wrapper:cargo",
+    environment = ":cargo_env",
+    tags = ["manual"],
+)
+
+# Wrap rustc binary with access to the environment variables
+env_wrapper(
+    name = "rustc",
+    binary = "@rules_rust//tools/upstream_wrapper:rustc",
+    environment = ":cargo_env",
+    tags = ["manual"],
+)
+
+# Make these tools available on the PATH
+bazel_env(
+    name = "bazel_env",
+    tools = {
+        "cargo": ":cargo",
+        "rustc": ":rustc",
+        "rustdoc": "@rules_rust//tools/upstream_wrapper:rustdoc",
+        "rustfmt": "@rules_rust//tools/upstream_wrapper:rustfmt",
+    },
 )
