@@ -32,15 +32,20 @@ jobs:
           bazelisk-cache: true
           disk-cache: ${{ github.workflow }}
           repository-cache: true
-      - run: |
+      - name: Run tests
+        working-directory: ${{ matrix.folders }}
+        run: |
           if [ "$MATRIX_BAZELVERSION" != "$ORIGINAL_BAZELVERSION" ]; then
             bazel mod deps --lockfile_mode=update
-            bazel run //tools:preset.update
+            if [ "$MATRIX_FOLDERS" = "." ]; then
+              bazel run //tools:preset.update
+            fi
           fi
           bazel test --config=ci //...
         env:
           MATRIX_BAZELVERSION: ${{ matrix.bazelversion }}
           ORIGINAL_BAZELVERSION: ${{ steps.bazel-version.outputs.original }}
+          MATRIX_FOLDERS: ${{ matrix.folders }}
   pre-commit:
     runs-on: ubuntu-latest
     steps:
