@@ -5,15 +5,25 @@ load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//rules/directory:providers.bzl", "DirectoryInfo")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 
+def _is_file_type(path):
+    return type(path) == "File"
+
 def _to_runfiles_path(path):
-    """Convert execution-root path to runfiles-relative (external/foo or ../foo -> foo)."""
+    """Convert execution-root path to runfiles-relative.
+
+    Examples:
+    - external/foo -> foo for external repositories
+    - ../foo -> foo for generated files
+    """
     if paths.starts_with(path, "external") or paths.starts_with(path, ".."):
-        return paths.join(*path.split("/")[1:])
+        return path.split("/", 1)[-1]
     return path
 
 def _make_abs_path(path):
     """Make a path absolute with $RUNFILES_DIR prefix, handling external repos."""
-    path = getattr(path, "path", path)
+    if _is_file_type(path):
+        path = path.path if path.is_source else path.short_path
+
     return paths.join("$RUNFILES_DIR", _to_runfiles_path(path))
 
 def _make_include_arg(dir):
@@ -52,9 +62,10 @@ def _cargo_env_impl(ctx):
         map_each = _make_abs_path,
     )
 
+    optional_openssl_dir = _get_optional(ctx.file.openssl_dir)
     substitutions.add_joined(
         "{OPENSSL_DIR}",
-        depset(_get_optional(ctx.file.openssl_dir.short_path)),
+        depset(optional_openssl_dir),
         join_with = "",  # dummy
         map_each = _make_abs_path,
     )
@@ -74,7 +85,7 @@ def _cargo_env_impl(ctx):
     )
 
     runfiles = ctx.runfiles(
-        files = ctx.files.include_directories + optional_clang + optional_libclang + _get_optional(ctx.file.openssl_dir),
+        files = ctx.files.include_directories + optional_clang + optional_libclang + optional_openssl_dir,
         transitive_files = depset(transitive = [target.files for target in ctx.attr.env_directories.values()]),
     )
 
