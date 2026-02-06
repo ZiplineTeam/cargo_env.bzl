@@ -32,7 +32,9 @@ jobs:
           bazelisk-cache: true
           disk-cache: ${{ github.workflow }}
           repository-cache: true
-      - run: |
+      - name: Run tests
+        working-directory: ${{ matrix.folders }}
+        run: |
           if [ "$MATRIX_BAZELVERSION" != "$ORIGINAL_BAZELVERSION" ]; then
             bazel mod deps --lockfile_mode=update
             bazel run //tools:preset.update
