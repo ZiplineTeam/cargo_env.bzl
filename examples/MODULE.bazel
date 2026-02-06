@@ -11,7 +11,6 @@ local_path_override(
 
 # keep-sorted start
 bazel_dep(name = "bazel_env.bzl", version = "0.7.1")
-bazel_dep(name = "bazelrc-preset.bzl", version = "1.9.2")
 bazel_dep(name = "openssl", version = "3.5.4.bcr.0")
 bazel_dep(name = "rules_rust", version = "0.68.1")
 bazel_dep(name = "toolchains_llvm", version = "1.6.0")

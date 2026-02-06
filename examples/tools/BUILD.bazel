@@ -1,11 +1,5 @@
 load("@bazel_env.bzl", "bazel_env")
-load("@bazelrc-preset.bzl", "bazelrc_preset")
 load("@cargo_env.bzl", "cargo_env", "env_wrapper")
-
-bazelrc_preset(
-    name = "preset",
-    doc_link_template = "https://registry.build/flag/bazel?filter={flag}",
-)
 
 # Make bazel managed dependencies available as environment variables for manual usage and local development
 cargo_env(
