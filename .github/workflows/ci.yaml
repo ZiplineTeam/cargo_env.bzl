@@ -35,9 +35,11 @@ jobs:
       - name: Run tests
         working-directory: ${{ matrix.folders }}
         run: |
-          if [ "$MATRIX_BAZELVERSION" != "$ORIGINAL_BAZELVERSION" ] && [ "$MATRIX_FOLDERS" = "." ]; then
+          if [ "$MATRIX_BAZELVERSION" != "$ORIGINAL_BAZELVERSION" ]; then
             bazel mod deps --lockfile_mode=update
-            bazel run //tools:preset.update
+            if [ "$MATRIX_FOLDERS" = "." ]; then
+              bazel run //tools:preset.update
+            fi
           fi
           bazel test --config=ci //...
         env:
