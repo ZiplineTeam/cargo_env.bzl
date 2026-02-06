@@ -35,7 +35,7 @@ jobs:
       - name: Run tests
         working-directory: ${{ matrix.folders }}
         run: |
-          if [ "$MATRIX_BAZELVERSION" != "$ORIGINAL_BAZELVERSION" ]; then
+          if [ "$MATRIX_BAZELVERSION" != "$ORIGINAL_BAZELVERSION" ] && [ "$MATRIX_FOLDERS" = "." ]; then
             bazel mod deps --lockfile_mode=update
             bazel run //tools:preset.update
           fi
@@ -43,6 +43,7 @@ jobs:
         env:
           MATRIX_BAZELVERSION: ${{ matrix.bazelversion }}
           ORIGINAL_BAZELVERSION: ${{ steps.bazel-version.outputs.original }}
+          MATRIX_FOLDERS: ${{ matrix.folders }}
   pre-commit:
     runs-on: ubuntu-latest
     steps:
