@@ -1,9 +1,11 @@
 # cargo_env.bzl
 
 Cargo is not a hermetic build system.
-If some dependencies are removed from the system and provided them via Bazel, we need to tell cargo where to find them.
-We do this by creating a `.envrc.cargo` file with paths to the Bazel-provided dependencies.
-Combined with <https://github.com/buildbuddy-io/bazel_env.bzl>, this allows cargo to find dependencies provided by Bazel.
+If some dependencies are provided by Bazel, we need to tell cargo where to find them.
+We do this by creating an environment file that sets the environment variables for cargo to find these dependencies.
+
+This environment file can be used either by wrapping binaries such as `cargo` or `rustc` with our `env_wrapper` rule.
+Combine this with <https://github.com/buildbuddy-io/bazel_env.bzl> to make the wrapper binaries available on the `PATH`.
 
 ## Usage
 

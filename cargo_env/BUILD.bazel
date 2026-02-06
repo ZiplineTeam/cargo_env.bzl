@@ -1,13 +1,18 @@
 load("@bazel_lib//:bzl_library.bzl", "bzl_library")
 
-exports_files(["template.env"])
+exports_files([
+    "template.env",
+    "env_wrapper.sh",
+])
 
 bzl_library(
     name = "cargo_env",
     srcs = ["cargo_env.bzl"],
     visibility = ["//visibility:public"],
     deps = [
+        "@bazel_lib//lib:expand_template",
         "@bazel_skylib//lib:paths",
         "@bazel_skylib//rules/directory:providers",
+        "@rules_shell//shell:rules_bzl",
     ],
 )
