@@ -1,6 +1,6 @@
 ########################
 # Import bazelrc presets
-import %workspace%/tools/preset.bazelrc
+import %workspace%/../tools/preset.bazelrc
 
 # Align with Bazel 8
 common --incompatible_use_plus_in_repo_names
