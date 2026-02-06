@@ -27,7 +27,10 @@ jobs:
       # GitHub repository which is a fork of the upstream where the Pull Request will be opened.
       registry_fork: ZiplineTeam/bazel-central-registry
       draft: false
-      author_email: acme-google-contributors@flyzipline.com
+      author_name: Zipline Open Source Bot
+      author_email: svc-open-source.github@flyzipline.com
+      committer_name: Zipline Open Source Bot
+      committer_email: svc-open-source.github@flyzipline.com
     permissions:
       attestations: write
       contents: write
