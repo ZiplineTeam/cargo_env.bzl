@@ -23,6 +23,8 @@ def _make_abs_path(path):
     """Make a path absolute with $RUNFILES_DIR prefix, handling external repos."""
     if _is_file_type(path):
         path = path.path if path.is_source else path.short_path
+    else:
+        path = getattr(path, "path", path)
 
     return paths.join("$RUNFILES_DIR", _to_runfiles_path(path))
 
