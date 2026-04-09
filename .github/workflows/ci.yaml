@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bazelversion: ["7.7.1", "8.5.1", "9.0.0"]
+        bazelversion: ["7.7.1", "8.6.0", "9.0.1"]
         folders: [".", "examples"]
     runs-on: ubuntu-latest
     steps:
@@ -27,7 +27,7 @@ jobs:
           echo "${{ matrix.bazelversion }}" > .bazelversion
           bazel version
       - name: Setup Bazel
-        uses: bazel-contrib/setup-bazel@43d7d5ceab59a307da44fc7585faa2a2fff4f88d # 0.16.0
+        uses: bazel-contrib/setup-bazel@d68576867819dfdec2cf9586a68795f81461da3e # 0.19.0
         with:
           bazelisk-cache: true
           disk-cache: ${{ github.workflow }}
