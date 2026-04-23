@@ -9,7 +9,6 @@ bazel_dep(name = "rules_shell", version = "0.6.1")
 # keep-sorted end
 
 # keep-sorted start
-bazel_dep(name = "bazel_skylib_gazelle_plugin", version = "1.9.0", dev_dependency = True)
+bazel_dep(name = "aspect_gazelle_prebuilt", version = "0.0.8", dev_dependency = True)
 bazel_dep(name = "bazelrc-preset.bzl", version = "1.9.2", dev_dependency = True)
-bazel_dep(name = "gazelle", version = "0.50.0", dev_dependency = True)
 # keep-sorted end
