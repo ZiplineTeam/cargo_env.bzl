@@ -13,6 +13,9 @@ alias(
 
 package_metadata(
     name = "package_metadata",
+    attributes = [
+        ":license",
+    ],
     purl = purl.bazel(
         module_name(),
         module_version(),
