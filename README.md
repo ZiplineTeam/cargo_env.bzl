@@ -1,4 +1,4 @@
-# cargo_env.bzl
+# Cargo_env.bzl
 
 Cargo is not a hermetic build system.
 If some dependencies are provided by Bazel, we need to tell cargo where to find them.

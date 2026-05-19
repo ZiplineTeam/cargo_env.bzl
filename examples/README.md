@@ -6,20 +6,20 @@ This folder contains examples of how to use the `cargo_env` rule.
 
 All dependencies are provided by Bazel, so you can run all tests using the following command:
 
-```bash
+```shell
 bazel test //...
 ```
 
 To make this work with `cargo`, you need to prepare your environment to use the `bazel_env` and our `cargo_env` rule.
 
-```bash
+```shell
 bazel run //tools:bazel_env # To setup bazel_env which provides the cargo binary wrapped with the cargo_env environment variables
 direnv allow .envrc         # To allow the environment to be used by cargo
 ```
 
 Now you can use `cargo` as usual:
 
-```bash
+```shell
 cargo test
 ```
 
