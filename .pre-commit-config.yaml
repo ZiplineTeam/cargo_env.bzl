@@ -103,8 +103,9 @@ repos:
       - id: check-build-file-without-extensions
       - id: check-non-existing-and-duplicate-excludes
       - id: check-snake-case
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.11.0.1
+  - repo: https://github.com/ewhauser/shuck
+    rev: v0.0.40
     hooks:
-      - id: shellcheck
-        exclude: "examples/.envrc"
+      - id: shuck
+        args:
+          - "--fix"

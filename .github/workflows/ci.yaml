@@ -71,8 +71,8 @@ jobs:
       - name: report success
         if: ${{ env.WORKFLOW_CONCLUSION == 'success' }}
         working-directory: /tmp
-        run: echo ${{ env.WORKFLOW_CONCLUSION }} && exit 0
+        run: echo "${{ env.WORKFLOW_CONCLUSION }}" && exit 0
       - name: report failure
         if: ${{ env.WORKFLOW_CONCLUSION == 'failure' }}
         working-directory: /tmp
-        run: echo ${{ env.WORKFLOW_CONCLUSION }} && exit 1
+        run: echo "${{ env.WORKFLOW_CONCLUSION }}" && exit 1
