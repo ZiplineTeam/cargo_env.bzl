@@ -58,7 +58,7 @@ repos:
       - id: yamllint
         args: [--strict]
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.37.1
+    rev: 0.37.2
     hooks:
       - id: check-github-workflows
   - repo: https://github.com/rhysd/actionlint
@@ -66,7 +66,7 @@ repos:
     hooks:
       - id: actionlint
   - repo: https://github.com/crate-ci/typos
-    rev: v1.45.0
+    rev: v1.46.1
     hooks:
       - id: typos
         exclude_types:
@@ -90,11 +90,12 @@ repos:
       - id: buildifier-lint
         args: [--version, "v8.5.1"]
   - repo: https://github.com/hofbi/dev-tools
-    rev: 1.7.0
+    rev: 1.11.0
     hooks:
       - id: check-build-file-without-extensions
       - id: check-non-existing-and-duplicate-excludes
       - id: check-snake-case
+      - id: check-readme-md-consistency
   - repo: https://github.com/ewhauser/shuck
     rev: v0.0.40
     hooks:
