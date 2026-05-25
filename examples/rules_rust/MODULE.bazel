@@ -6,7 +6,7 @@ module(
 bazel_dep(name = "cargo_env.bzl")
 local_path_override(
     module_name = "cargo_env.bzl",
-    path = "..",
+    path = "../..",
 )
 
 # keep-sorted start
