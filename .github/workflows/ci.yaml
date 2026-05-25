@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         bazelversion: ["8.7.0", "9.1.0"]
-        folders: [".", "examples"]
+        folders: [".", "examples/rules_rust"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -54,7 +54,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Install uv and set the Python version
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v8.1.0
         with:
           python-version: "3.14"
       - run: uvx prek run --all-files --show-diff-on-failure

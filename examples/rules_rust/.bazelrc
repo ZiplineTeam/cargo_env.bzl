@@ -1,6 +1,6 @@
 ########################
 # Import bazelrc presets
-import %workspace%/../tools/preset.bazelrc
+import %workspace%/../../tools/preset.bazelrc
 
 # To have a smaller clang toolchain
 common --noincompatible_disallow_empty_glob
