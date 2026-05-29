@@ -13,11 +13,15 @@ local_path_override(
 bazel_dep(name = "bazel_env.bzl", version = "0.7.1")
 bazel_dep(name = "llvm", version = "0.8.3")
 bazel_dep(name = "openssl", version = "3.5.4.bcr.1")
+bazel_dep(name = "rules_cc", version = "0.2.18")
 bazel_dep(name = "rules_rust", version = "0.70.0")
 bazel_dep(name = "zstd", version = "1.5.7.bcr.1")
 # keep-sorted end
 
 register_toolchains("@llvm//toolchain:all")
+
+llvm = use_extension("@llvm//extensions:llvm.bzl", "llvm")
+use_repo(llvm, "llvm-project")
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
