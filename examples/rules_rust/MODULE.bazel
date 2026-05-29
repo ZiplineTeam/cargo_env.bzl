@@ -11,35 +11,13 @@ local_path_override(
 
 # keep-sorted start
 bazel_dep(name = "bazel_env.bzl", version = "0.7.1")
+bazel_dep(name = "llvm", version = "0.8.3")
 bazel_dep(name = "openssl", version = "3.5.4.bcr.1")
 bazel_dep(name = "rules_rust", version = "0.70.0")
-bazel_dep(name = "toolchains_llvm", version = "1.6.0")
 bazel_dep(name = "zstd", version = "1.5.7.bcr.1")
 # keep-sorted end
 
-# LLVM version config
-# kernel.org slim toolchain: https://mirrors.kernel.org/pub/tools/llvm/files/
-_LLVM_VERSION = "21.1.6"
-
-llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
-llvm.toolchain(
-    llvm_version = _LLVM_VERSION,
-    sha256 = {
-        "linux-aarch64": "4b9c6d122450e39f9ce3e29df8a8efc54727e663145dda6bd5ab765eaf09fa32",
-        "linux-x86_64": "1adb2ef87c6b7ed6a4c37b507cb18046be521d809fd9db4359a3592d7265f389",
-    },
-    strip_prefix = {
-        "linux-aarch64": "llvm-{}-aarch64".format(_LLVM_VERSION),
-        "linux-x86_64": "llvm-{}-x86_64".format(_LLVM_VERSION),
-    },
-    urls = {
-        # Slimmer toolchains of clang than the defaults.
-        "linux-aarch64": ["https://mirrors.kernel.org/pub/tools/llvm/files/llvm-{}-aarch64.tar.xz".format(_LLVM_VERSION)],
-        "linux-x86_64": ["https://mirrors.kernel.org/pub/tools/llvm/files/llvm-{}-x86_64.tar.xz".format(_LLVM_VERSION)],
-        # darwin (macOS): no override, uses default github.com/llvm/llvm-project releases
-    },
-)
-use_repo(llvm, "llvm_toolchain_llvm")
+register_toolchains("@llvm//toolchain:all")
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(

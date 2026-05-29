@@ -2,8 +2,8 @@
 # Import bazelrc presets
 import %workspace%/../../tools/preset.bazelrc
 
-# To have a smaller clang toolchain
-common --noincompatible_disallow_empty_glob
+common --repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+common --repo_env=BAZEL_NO_APPLE_CPP_TOOLCHAIN=1
 
 # Load any settings specific to the current user.
 # .bazelrc.user should appear in .gitignore so that settings are not shared with team members
