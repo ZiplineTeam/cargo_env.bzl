@@ -4,7 +4,7 @@ load("@cargo_env.bzl", "cargo_env", "env_wrapper")
 # Make bazel managed dependencies available as environment variables for manual usage and local development
 cargo_env(
     name = "cargo_env",
-    clang = "@llvm_toolchain_llvm//:bin/clang",
+    clang = "@llvm//tools:clang",
     # libclang = "@llvm_toolchain_llvm//:lib/libclang.so",  # TODO: does not work on Mac yet
     openssl_dir = "@openssl//:gen_dir",
     tags = ["manual"],
