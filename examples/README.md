@@ -1,6 +1,7 @@
 # Cargo Env Examples
 
-This folder contains examples of how to use the `cargo_env` rule.
+This folder contains examples of how to use the `cargo_env` rule with [rules_rust](https://github.com/bazelbuild/rules_rust) and [rules_rs](https://github.com/hermeticbuild/rules_rs).
+Usage is as documented below for both examples in the respective subfolders.
 
 ## Usage
 

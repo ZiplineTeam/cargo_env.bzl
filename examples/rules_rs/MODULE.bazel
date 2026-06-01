@@ -1,0 +1,70 @@
+module(
+    name = "cargo_env_examples",
+    version = "0.0.0",
+)
+
+bazel_dep(name = "cargo_env.bzl")
+local_path_override(
+    module_name = "cargo_env.bzl",
+    path = "../..",
+)
+
+# keep-sorted start
+bazel_dep(name = "bazel_env.bzl", version = "0.7.1")
+bazel_dep(name = "llvm", version = "0.8.3")
+bazel_dep(name = "openssl", version = "3.5.5.bcr.0")
+bazel_dep(name = "rules_rs", version = "0.0.82")
+bazel_dep(name = "zstd", version = "1.5.7.bcr.1")
+# keep-sorted end
+
+toolchains = use_extension("@rules_rs//rs/toolchains:module_extension.bzl", "toolchains")
+toolchains.toolchain(
+    edition = "2024",
+    version = "1.91.0",
+)
+use_repo(toolchains, "default_rust_toolchains")
+
+# Keep existing @rules_rust//tools/upstream_wrapper: references working.
+rules_rust = use_extension("@rules_rs//rs:rules_rust.bzl", "rules_rust")
+use_repo(rules_rust, "rules_rust")
+
+register_toolchains(
+    "@default_rust_toolchains//:all",
+    "@llvm//toolchain:all",
+)
+
+crate = use_extension("@rules_rs//rs:extensions.bzl", "crate")
+crate.from_cargo(
+    name = "crates",
+    cargo_lock = "//:Cargo.lock",
+    cargo_toml = "//:Cargo.toml",
+    platform_triples = [
+        "aarch64-apple-darwin",
+        "aarch64-unknown-linux-gnu",
+        "x86_64-unknown-linux-gnu",
+    ],
+)
+crate.annotation(
+    build_script_data = [
+        "@openssl//:gen_dir",
+    ],
+    build_script_env = {
+        "OPENSSL_DIR": "$(execpath @openssl//:gen_dir)",
+        "OPENSSL_NO_VENDOR": "1",
+        "OPENSSL_STATIC": "1",
+    },
+    crate = "openssl-sys",
+    data = ["@openssl//:gen_dir"],
+    gen_build_script = "on",
+)
+crate.annotation(
+    crate = "zstd-sys",
+    gen_build_script = "off",
+    repositories = ["crates"],
+    deps = [
+        "@zstd",
+    ],
+)
+use_repo(crate, "crates")
+
+inject_repo(crate, "openssl", "zstd")
