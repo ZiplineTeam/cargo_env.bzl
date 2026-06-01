@@ -10,9 +10,9 @@ local_path_override(
 )
 
 # keep-sorted start
-bazel_dep(name = "bazel_env.bzl", version = "0.7.1")
+bazel_dep(name = "bazel_env.bzl", version = "0.7.2")
 bazel_dep(name = "llvm", version = "0.8.3")
-bazel_dep(name = "openssl", version = "3.5.5.bcr.0")
+bazel_dep(name = "openssl", version = "3.5.5.bcr.4")
 bazel_dep(name = "rules_rs", version = "0.0.82")
 bazel_dep(name = "zstd", version = "1.5.7.bcr.1")
 # keep-sorted end
