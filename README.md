@@ -10,4 +10,4 @@ Find more examples on how to use `bazel_env.bzl` in <https://github.com/hofbi/ba
 
 ## Usage
 
-See our [rules_rust examples](./examples/rules_rust/) for how to use this with rules_rust.
+See our [examples](./examples/) for how to use this with [rules_rust](https://github.com/bazelbuild/rules_rust) and [rules_rs](https://github.com/hermeticbuild/rules_rs).
