@@ -29,8 +29,15 @@ set -o pipefail
 # but `RUNFILES_DIR` is set correctly.
 #
 # We need this variable because the `export` lines in the ${ENVIRONMENT_PATH} file
-# refer to it.
-RUNFILES_DIR=${RUNFILES_DIR:-${PWD}/..}
+# refer to it. It must be exported so tools from those variables inherit their
+# runfiles environment.
+export RUNFILES_DIR=${RUNFILES_DIR:-${PWD}/..}
+if [[ -n "${RUNFILES_MANIFEST_FILE:-}" ]]; then
+    export RUNFILES_MANIFEST_FILE
+fi
+if [[ -n "${RUNFILES_MANIFEST_ONLY:-}" ]]; then
+    export RUNFILES_MANIFEST_ONLY
+fi
 
 # shellcheck source=/dev/null
 source "$(rlocation "${ENVIRONMENT_PATH}")"

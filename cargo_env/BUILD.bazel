@@ -1,4 +1,7 @@
 load("@bazel_lib//:bzl_library.bzl", "bzl_library")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load(":cargo_env.bzl", "cargo_env")
 
 exports_files([
     "template.env",
@@ -15,4 +18,42 @@ bzl_library(
         "@bazel_skylib//rules/directory:providers",
         "@rules_shell//shell:rules_bzl",
     ],
+)
+
+cargo_env(
+    name = "env_files_test_env",
+    testonly = True,
+    env_directories = {
+        "TEST_MAIN_REPO_DIR": ":env_files_test_main_repo_files",
+    },
+    env_directory_subpaths = {
+        "TEST_MAIN_REPO_DIR": "cargo_env",
+    },
+    env_files = {
+        "TEST_FILE": ":env_files_test_tool_data.txt",
+        "TEST_TOOL": ":env_files_test_tool",
+    },
+)
+
+filegroup(
+    name = "env_files_test_main_repo_files",
+    srcs = ["env_files_test_tool_data.txt"],
+)
+
+sh_binary(
+    name = "env_files_test_tool",
+    srcs = ["env_files_test_tool.sh"],
+    data = ["env_files_test_tool_data.txt"],
+)
+
+sh_test(
+    name = "env_files_test",
+    srcs = ["env_files_test.sh"],
+    args = [
+        "$(location :env_files_test_env)",
+    ],
+    data = [
+        ":env_files_test_env",
+    ],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
 )
