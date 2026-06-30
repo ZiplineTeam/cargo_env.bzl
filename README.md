@@ -11,3 +11,7 @@ Find more examples on how to use `bazel_env.bzl` in <https://github.com/hofbi/ba
 ## Usage
 
 See our [examples](./examples/) for how to use this with [rules_rust](https://github.com/bazelbuild/rules_rust) and [rules_rs](https://github.com/hermeticbuild/rules_rs).
+
+Use `env_directories` when a build script needs an environment variable that points at a dependency root directory.
+Use `env_directory_subpaths` with `env_directories` when the environment variable should point at a relative path under that dependency root.
+Use `env_files` when it needs an environment variable that points at one exact file such as a tool binary.
