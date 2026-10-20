@@ -10,11 +10,11 @@ local_path_override(
 )
 
 # keep-sorted start
-bazel_dep(name = "bazel_env.bzl", version = "0.7.2")
-bazel_dep(name = "llvm", version = "0.8.3")
+bazel_dep(name = "bazel_env.bzl", version = "0.10.0")
+bazel_dep(name = "llvm", version = "0.8.25")
 bazel_dep(name = "openssl", version = "3.5.5.bcr.4")
-bazel_dep(name = "rules_rust", version = "0.70.0")
-bazel_dep(name = "zstd", version = "1.5.7.bcr.1")
+bazel_dep(name = "rules_rust", version = "0.74.0")
+bazel_dep(name = "zstd", version = "1.5.7.bcr.3")
 # keep-sorted end
 
 register_toolchains("@llvm//toolchain:all")
@@ -28,7 +28,7 @@ rust.toolchain(
 use_repo(rust, "rust_toolchains")
 
 crate = use_extension(
-    "@rules_rust//crate_universe:extension.bzl",
+    "@rules_rust//crate_universe:extensions.bzl",
     "crate",
 )
 crate.annotation_select(
@@ -46,10 +46,8 @@ crate.annotation_select(
 crate.annotation(
     crate = "zstd-sys",
     gen_build_script = "off",
+    link_deps = ["@zstd"],
     repositories = ["crates"],
-    deps = [
-        "@zstd",
-    ],
 )
 crate.from_cargo(
     cargo_lockfile = "//:Cargo.lock",

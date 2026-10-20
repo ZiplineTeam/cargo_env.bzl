@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bazelversion: ["8.7.0", "9.1.0"]
+        bazelversion: ["8.8.1", "9.3.0"]
         folders: [".", "examples/rules_rust"]
     runs-on: ubuntu-latest
     steps:
