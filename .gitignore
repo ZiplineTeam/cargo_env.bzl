@@ -4,4 +4,5 @@ bazel-*
 .idea/
 .ijwb/
 
+.bazel_env
 .envrc.cargo
