@@ -11,4 +11,4 @@ on-missing-language-definition = "fail"
 on-missing-tool-binary = "fail"
 
 [code-block-tools.languages]
-shell = {lint = ["shuck"], format = ["shfmt"]}
+shell = { format = ["shuck:format"] }
