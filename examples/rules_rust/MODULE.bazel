@@ -22,8 +22,8 @@ register_toolchains("@llvm//toolchain:all")
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
     edition = "2024",
-    rustfmt_version = "1.91.0",
-    versions = ["1.91.0"],
+    rustfmt_version = "1.99.1",
+    versions = ["1.99.1"],
 )
 use_repo(rust, "rust_toolchains")
 
