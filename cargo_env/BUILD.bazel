@@ -12,6 +12,7 @@ bzl_library(
     deps = [
         "@bazel_lib//lib:expand_template",
         "@bazel_skylib//lib:paths",
+        "@bazel_skylib//lib:shell",
         "@bazel_skylib//rules/directory:providers",
         "@rules_shell//shell:rules_bzl",
     ],
