@@ -32,12 +32,27 @@ def _make_include_arg(dir):
     return "-I" + _make_abs_path(dir[DirectoryInfo])
 
 def _make_custom_env_arg(item):
-    return "export {}=\"{}\"".format(item[0], _make_abs_path(item[1].label.workspace_root or "."))
+    env_name, target = item
+    if DirectoryInfo in target:
+        path = target[DirectoryInfo].path
+        if not target.label.workspace_root:
+            path = paths.join("_main", path)
+    else:
+        # Preserve the original repository-root behavior for filegroup targets.
+        path = target.label.workspace_root or "."
+    return "export {}=\"{}\"".format(env_name, _make_abs_path(path))
+
+def _make_env_arg(item):
+    return "export {}=\"{}\"".format(item[0], item[1])
 
 def _get_optional(optional_file):
     return [optional_file] if optional_file else []
 
 def _cargo_env_impl(ctx):
+    for env_name in ctx.attr.env:
+        if env_name in ctx.attr.env_directories:
+            fail("{} may not be set in both env and env_directories".format(env_name))
+
     output = ctx.actions.declare_file("%s.env" % ctx.attr.name)
     substitutions = ctx.actions.template_dict()
 
@@ -72,12 +87,14 @@ def _cargo_env_impl(ctx):
         map_each = _make_abs_path,
     )
 
-    substitutions.add_joined(
-        "{CUSTOM_ENV}",
-        depset(ctx.attr.env_directories.items()),
-        join_with = "\n",
-        map_each = _make_custom_env_arg,
-    )
+    custom_env = [
+        _make_env_arg(item)
+        for item in ctx.attr.env.items()
+    ] + [
+        _make_custom_env_arg(item)
+        for item in ctx.attr.env_directories.items()
+    ]
+    substitutions.add("{CUSTOM_ENV}", "\n".join(custom_env))
 
     ctx.actions.expand_template(
         output = output,
@@ -100,9 +117,13 @@ cargo_env = rule(
             allow_single_file = True,
             doc = "The clang binary.",
         ),
+        "env": attr.string_dict(
+            default = {},
+            doc = "Map of environment variable names to literal values.",
+        ),
         "env_directories": attr.string_keyed_label_dict(
             default = {},
-            doc = "Map of environment variable names to filegroup targets. The path will be the repo/package root of the target. Example: {\"MY_LIB_PATH\": \"@my_lib//:source_files\"}",
+            doc = "Map of environment variable names to targets. Uses DirectoryInfo.path when available; otherwise uses the target repository root. Example: {\"MY_INCLUDE_PATH\": \"@my_package//:include_directory\"}",
         ),
         "include_directories": attr.label_list(
             default = [],
@@ -132,6 +153,9 @@ cargo_env = rule(
         include_directories = ["@my_library//:headers_directory"],
         libclang = "@llvm_toolchain_llvm//:lib/libclang.so",
         openssl_dir = "@openssl//:gen_dir",
+        env = {
+            "SOME_VALUE": "value",
+        },
         env_directories = {
             "SOME_PACKAGE_PATH": "@some_package//:source_files",
         },
