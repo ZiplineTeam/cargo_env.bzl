@@ -1,5 +1,5 @@
 bcr_test_module_rules_rs:
-  module_path: "example/rules_rs"
+  module_path: "examples/rules_rs"
   matrix:
     platform: ["macos", "ubuntu2204", "windows"]
     bazel: ["9.x", "8.x"]
