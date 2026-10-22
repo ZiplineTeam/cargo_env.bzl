@@ -2,6 +2,7 @@
 
 load("@bazel_lib//lib:expand_template.bzl", "expand_template")
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules/directory:providers.bzl", "DirectoryInfo")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 
@@ -43,7 +44,7 @@ def _make_custom_env_arg(item):
     return "export {}=\"{}\"".format(env_name, _make_abs_path(path))
 
 def _make_env_arg(item):
-    return "export {}=\"{}\"".format(item[0], item[1])
+    return "export {}={}".format(item[0], shell.quote(item[1]))
 
 def _get_optional(optional_file):
     return [optional_file] if optional_file else []
