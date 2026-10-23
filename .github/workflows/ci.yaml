@@ -1,9 +1,11 @@
 name: CI
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 concurrency:
   # Cancel previous actions from the same PR or branch except 'main' branch.
@@ -15,8 +17,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bazelversion: ["8.8.2", "9.3.1"]
-        folders: [".", "examples/rules_rust"]
+        bazelversion:
+          - "8.8.2"
+          - "9.3.1"
+        folders:
+          - "."
+          - "examples/rules_rust"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -61,7 +67,9 @@ jobs:
   # For branch protection settings, this job provides a "stable" name that can be used to gate PR merges
   # on "all matrix jobs were successful".
   conclusion:
-    needs: [test, prek]
+    needs:
+      - test
+      - prek
     runs-on: ubuntu-latest
     if: always()
     steps:
