@@ -1,8 +1,13 @@
 bcr_test_module:
   module_path: "."
   matrix:
-    platform: ["macos", "ubuntu2204", "windows"]
-    bazel: ["9.x", "8.x"]
+    platform:
+      - "macos"
+      - "ubuntu2204"
+      # - "windows" TODO(https://github.com/ZiplineTeam/cargo_env.bzl/issues/36): Enable
+    bazel:
+      - "9.x"
+      - "8.x"
   tasks:
     test_rules_rs:
       name: "Run tests on examples/rules_rs"

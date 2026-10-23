@@ -3,3 +3,4 @@ formatter:
   drop_merge_tag: true
   scan_folded_as_literal: true
   retain_line_breaks: true
+  force_array_style: block
