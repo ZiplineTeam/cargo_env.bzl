@@ -1,24 +1,19 @@
-bcr_test_module_rules_rs:
-  module_path: "examples/rules_rs"
+bcr_test_module:
+  module_path: "."
   matrix:
     platform: ["macos", "ubuntu2204", "windows"]
     bazel: ["9.x", "8.x"]
   tasks:
-    run_tests:
-      name: "Run tests on examples/rules_rs module"
+    test_rules_rs:
+      name: "Run tests on examples/rules_rs"
+      working_directory: "examples/rules_rs"
       platform: ${{ platform }}
       bazel: ${{ bazel }}
       test_targets:
         - "//..."
-
-bcr_test_module_rules_rust:
-  module_path: "examples/rules_rust"
-  matrix:
-    platform: ["macos", "ubuntu2204", "windows"]
-    bazel: ["9.x", "8.x"]
-  tasks:
-    run_tests:
-      name: "Run tests on examples/rules_rust module"
+    test_rules_rust:
+      name: "Run tests on examples/rules_rust"
+      working_directory: "examples/rules_rust"
       platform: ${{ platform }}
       bazel: ${{ bazel }}
       test_targets:
