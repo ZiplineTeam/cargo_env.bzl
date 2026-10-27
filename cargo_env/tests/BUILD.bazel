@@ -1,0 +1,52 @@
+load("@bazel_skylib//rules/directory:directory.bzl", "directory")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load("//cargo_env:cargo_env.bzl", "cargo_env", "env_wrapper")
+
+directory(
+    name = "test_directory",
+    srcs = ["testdata/directory/sentinel.txt"],
+)
+
+filegroup(
+    name = "filegroup_files",
+    srcs = ["testdata/filegroup/sentinel.txt"],
+)
+
+cargo_env(
+    name = "env_under_test",
+    env = {
+        "CUSTOM_LITERAL": "cost $5, \"double quotes\", and 'single quotes'",
+    },
+    env_directories = {
+        "CUSTOM_DIRECTORY": ":test_directory",
+        "FILEGROUP_ROOT": ":filegroup_files",
+    },
+)
+
+sh_test(
+    name = "cargo_env_test",
+    srcs = ["cargo_env_test.sh"],
+    args = ["$(rlocationpath :env_under_test)"],
+    data = [":env_under_test"],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
+)
+
+sh_binary(
+    name = "env_wrapper_probe",
+    srcs = ["env_wrapper_probe.sh"],
+)
+
+env_wrapper(
+    name = "env_wrapper_under_test",
+    binary = ":env_wrapper_probe",
+    environment = ":env_under_test",
+)
+
+sh_test(
+    name = "env_wrapper_test",
+    srcs = ["env_wrapper_test.sh"],
+    args = ["$(rlocationpath :env_wrapper_under_test)"],
+    data = [":env_wrapper_under_test"],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
+)
