@@ -39,7 +39,7 @@ def _make_custom_env_arg(item):
         if not target.label.workspace_root:
             path = paths.join("_main", path)
     else:
-        # Preserve the original repository-root behavior for filegroup targets.
+        # Targets without DirectoryInfo use their repository root.
         path = target.label.workspace_root or "."
     return "export {}=\"{}\"".format(env_name, _make_abs_path(path))
 
