@@ -20,8 +20,8 @@
     "https://bcr.bazel.build/modules/apple_support/1.21.1/MODULE.bazel": "5809fa3efab15d1f3c3c635af6974044bac8a4919c62238cce06acee8a8c11f1",
     "https://bcr.bazel.build/modules/apple_support/2.5.2/MODULE.bazel": "bb1b7081e390a8d3885f642cb0073dfcf8e7a36525e079fa8f5835af7079c0fe",
     "https://bcr.bazel.build/modules/apple_support/2.5.2/source.json": "dd51ee925a550e92b55eb41c4c809a967da311a2d2520241252a238a48b39c4c",
-    "https://bcr.bazel.build/modules/aspect_gazelle_prebuilt/0.0.27/MODULE.bazel": "44058537762542e69b784b8fe9beb9506b8597a5b7eeee3614197fe8c4b0f595",
-    "https://bcr.bazel.build/modules/aspect_gazelle_prebuilt/0.0.27/source.json": "11513a0b3e0c1939c14ba0cd15c1422e2f340042aa3e7cea1ee79609c19ae847",
+    "https://bcr.bazel.build/modules/aspect_gazelle_prebuilt/0.0.28/MODULE.bazel": "38f8e408ce4448f29d72eb368eee8a8fb0b93501dc1b48270f8ec12cc831f7de",
+    "https://bcr.bazel.build/modules/aspect_gazelle_prebuilt/0.0.28/source.json": "9c50d1aeb67dda0dd436c29e803c7d8c955a90b1495d57f1a7a037313d71bede",
     "https://bcr.bazel.build/modules/aspect_tools_telemetry/0.5.2/MODULE.bazel": "c715a5fb6b13a0086c061618f00d033a4ab6d76cbd1083e38d7ca953b5e547f4",
     "https://bcr.bazel.build/modules/aspect_tools_telemetry/0.5.2/source.json": "4dd300d44767ad4860098b006dda614e67ab0409ae6ec6e133faad303fe9ede8",
     "https://bcr.bazel.build/modules/bazel_features/1.0.0/MODULE.bazel": "d7f022dc887efb96e1ee51cec7b2e48d41e36ff59a6e4f216c40e4029e1585bf",
@@ -208,8 +208,8 @@
   "moduleExtensions": {
     "@@aspect_gazelle_prebuilt+//:extensions.bzl%prebuilt_extension": {
       "general": {
-        "bzlTransitiveDigest": "doZWUEOlJlUCZ6RjAYgAac/8oH6X0Jvr9GBQWxiDiFY=",
-        "usagesDigest": "lOdNxw5vY0H2TbwgIoLtqCFrDaofl9uUKU5Dq3weXIg=",
+        "bzlTransitiveDigest": "PYoBaMDucThdgvTa6pRRhDSVUUSDr/L23AKC4QQh8AM=",
+        "usagesDigest": "lshITmF1VlUn6hVlWwFC2Va+NYfTKpZAbb+V11vw/1o=",
         "recordedInputs": [
           "REPO_MAPPING:aspect_gazelle_prebuilt+,bazel_tools bazel_tools"
         ],
@@ -218,9 +218,9 @@
             "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
             "attributes": {
               "executable": true,
-              "sha256": "a4c637460927f512c30f4b31fc916640f4750ddf046dc91ceb60765bfedd0fca",
+              "sha256": "599cfc454e86ea39adddf3ec6f34fbeae254521a258e0de65bc4f67e58f4509d",
               "urls": [
-                "https://github.com/aspect-build/aspect-gazelle/releases/download/prebuilt-v0.0.27/aspect_gazelle-linux_amd64"
+                "https://github.com/aspect-build/aspect-gazelle/releases/download/prebuilt-v0.0.28/aspect_gazelle-linux_amd64"
               ]
             }
           },
@@ -228,9 +228,9 @@
             "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
             "attributes": {
               "executable": true,
-              "sha256": "e5f7ce56f515d8dc00118fc93e061179ca7f1e7e062cd8bf012cbcb92e44f9ed",
+              "sha256": "8818864c1e41c3ebaeefd7774ededf44dbd1b311cc1fb9ac50cb487bc739c0b8",
               "urls": [
-                "https://github.com/aspect-build/aspect-gazelle/releases/download/prebuilt-v0.0.27/aspect_gazelle-linux_arm64"
+                "https://github.com/aspect-build/aspect-gazelle/releases/download/prebuilt-v0.0.28/aspect_gazelle-linux_arm64"
               ]
             }
           },
@@ -238,9 +238,9 @@
             "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
             "attributes": {
               "executable": true,
-              "sha256": "33dee07244ac1b52443f954f48b2ec8c4b3dd4ff90f188f245cc2c7e098ab3af",
+              "sha256": "412490eacf6f575a6d8ea1e252aee5f8c23ed14bc0224b49c867c6db9d192f37",
               "urls": [
-                "https://github.com/aspect-build/aspect-gazelle/releases/download/prebuilt-v0.0.27/aspect_gazelle-darwin_amd64"
+                "https://github.com/aspect-build/aspect-gazelle/releases/download/prebuilt-v0.0.28/aspect_gazelle-darwin_amd64"
               ]
             }
           },
@@ -248,9 +248,58 @@
             "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_file",
             "attributes": {
               "executable": true,
-              "sha256": "48c629bd09f575d7abdfb1c62754e1b2498a83172a5c96425ad18483d3cffbb7",
+              "sha256": "22cea20552284b5e7814b43f2dcd09de05793de6e7cc1ad3c304cdac3d41cf54",
               "urls": [
-                "https://github.com/aspect-build/aspect-gazelle/releases/download/prebuilt-v0.0.27/aspect_gazelle-darwin_arm64"
+                "https://github.com/aspect-build/aspect-gazelle/releases/download/prebuilt-v0.0.28/aspect_gazelle-darwin_arm64"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "@@aspect_tools_telemetry+//:extension.bzl%telemetry": {
+      "general": {
+        "bzlTransitiveDigest": "ihzLOoAnQP6Y5iSYOhEjvb6uxEbA6ZgH8Qikau2lGRU=",
+        "usagesDigest": "hwyW9pmhGodBJhbUHILrvq0uTV2rBwUI8zdxXu1LN4I=",
+        "recordedInputs": [
+          "REPO_MAPPING:aspect_tools_telemetry+,bazel_lib bazel_lib+",
+          "REPO_MAPPING:aspect_tools_telemetry+,bazel_skylib bazel_skylib+",
+          "ENV:ASPECT_TOOLS_TELEMETRY_TEST \\0"
+        ],
+        "generatedRepoSpecs": {
+          "aspect_tools_telemetry_report": {
+            "repoRuleId": "@@aspect_tools_telemetry+//:extension.bzl%tel_repository",
+            "attributes": {
+              "deps": {
+                "aspect_gazelle_prebuilt": "0.0.28",
+                "aspect_tools_telemetry": "0.5.2"
+              },
+              "last_notice": 0
+            }
+          }
+        },
+        "moduleExtensionMetadata": {
+          "useAllRepos": "NO",
+          "reproducible": false
+        }
+      }
+    },
+    "@@pybind11_bazel+//:internal_configure.bzl%internal_configure_extension": {
+      "general": {
+        "bzlTransitiveDigest": "BsgERqYptkJeeC8wFaLj251IoTZTSy/58WA6kVp0q8I=",
+        "usagesDigest": "D1r3lfzMuUBFxgG8V6o0bQTLMk3GkaGOaPzw53wrwyw=",
+        "recordedInputs": [
+          "REPO_MAPPING:pybind11_bazel+,bazel_tools bazel_tools",
+          "FILE:@@pybind11_bazel+//MODULE.bazel e6f4c20442eaa7c90d7190d8dc539d0ab422f95c65a57cc59562170c58ae3d34"
+        ],
+        "generatedRepoSpecs": {
+          "pybind11": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@pybind11_bazel+//:pybind11-BUILD.bazel",
+              "strip_prefix": "pybind11-2.12.0",
+              "urls": [
+                "https://github.com/pybind/pybind11/archive/v2.12.0.zip"
               ]
             }
           }
@@ -513,6 +562,10 @@
       }
     }
   },
-  "facts": {},
+  "facts": {
+    "@@aspect_tools_telemetry+//:extension.bzl%telemetry": {
+      "notice_version": "3"
+    }
+  },
   "factsVersions": {}
 }

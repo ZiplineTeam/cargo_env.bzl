@@ -20,9 +20,11 @@ jobs:
         bazelversion:
           - "8.8.2"
           - "9.3.1"
+          - "10.0.0rc2"
         folders:
           - "."
           - "examples/rules_rust"
+          - "examples/rules_rs"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
