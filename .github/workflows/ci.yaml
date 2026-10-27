@@ -27,7 +27,7 @@ jobs:
           - "examples/rules_rs"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Configure Bazel version
         id: bazel-version
         run: |
@@ -35,7 +35,7 @@ jobs:
           echo "${{ matrix.bazelversion }}" > .bazelversion
           bazel version
       - name: Setup Bazel
-        uses: bazel-contrib/setup-bazel@d68576867819dfdec2cf9586a68795f81461da3e # 0.19.0
+        uses: bazel-contrib/setup-bazel@104e3eea9447cdaa4b00d0fb46191a3985d26ab3 # 0.19.1
         with:
           bazelisk-cache: true
           disk-cache: ${{ github.workflow }}
@@ -60,9 +60,9 @@ jobs:
   prek:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Install uv and set the Python version
-        uses: astral-sh/setup-uv@v8.1.0
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           python-version: "3.14"
       - run: uvx prek run --all-files --show-diff-on-failure
