@@ -1,0 +1,36 @@
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load("//cargo_env:cargo_env.bzl", "cargo_env", "env_wrapper")
+
+# Directories from the main repository, one with source files and one with
+# generated files.
+cargo_env(
+    name = "env_under_test",
+    env_directories = {
+        "GENERATED_DIRECTORY": "//cargo_env/tests/directories/generated",
+        "SOURCE_DIRECTORY": "//cargo_env/tests/directories/source",
+    },
+    include_directories = [
+        "//cargo_env/tests/directories/generated",
+        "//cargo_env/tests/directories/source",
+    ],
+)
+
+sh_binary(
+    name = "directories_probe",
+    srcs = ["directories_probe.sh"],
+)
+
+env_wrapper(
+    name = "directories_wrapper",
+    binary = ":directories_probe",
+    environment = ":env_under_test",
+)
+
+sh_test(
+    name = "directories_test",
+    srcs = ["directories_test.sh"],
+    args = ["$(rlocationpath :directories_wrapper)"],
+    data = [":directories_wrapper"],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
+)

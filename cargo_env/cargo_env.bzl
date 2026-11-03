@@ -29,15 +29,29 @@ def _make_abs_path(path):
 
     return paths.join("$RUNFILES_DIR", _to_runfiles_path(path))
 
+def _directory_runfiles_path(directory):
+    """Convert a DirectoryInfo path (relative to the execution root) to runfiles-relative.
+
+    Examples:
+    - external/foo/include -> foo/include
+    - include -> _main/include
+    - bazel-out/<config>/bin/include -> _main/include for generated directories
+    """
+    path = directory.path
+    if paths.starts_with(path, "bazel-out"):
+        # Generated directory: drop the bazel-out/<config>/bin prefix.
+        path = "/".join(path.split("/")[3:])
+    if paths.starts_with(path, "external") or paths.starts_with(path, ".."):
+        return _to_runfiles_path(path)
+    return paths.join("_main", path)
+
 def _make_include_arg(dir):
-    return "-I" + _make_abs_path(dir[DirectoryInfo])
+    return "-I" + paths.join("$RUNFILES_DIR", _directory_runfiles_path(dir[DirectoryInfo]))
 
 def _make_custom_env_arg(item):
     env_name, target = item
     if DirectoryInfo in target:
-        path = target[DirectoryInfo].path
-        if not target.label.workspace_root:
-            path = paths.join("_main", path)
+        path = _directory_runfiles_path(target[DirectoryInfo])
     else:
         # Preserve the original repository-root behavior for filegroup targets.
         path = target.label.workspace_root or "."

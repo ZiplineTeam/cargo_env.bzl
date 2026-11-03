@@ -1,0 +1,7 @@
+load("@bazel_skylib//rules/directory:directory.bzl", "directory")
+
+directory(
+    name = "source",
+    srcs = ["sentinel.txt"],
+    visibility = ["//cargo_env/tests/directories:__pkg__"],
+)

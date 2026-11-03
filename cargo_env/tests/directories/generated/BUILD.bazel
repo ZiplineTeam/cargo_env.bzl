@@ -1,0 +1,13 @@
+load("@bazel_skylib//rules/directory:directory.bzl", "directory")
+
+genrule(
+    name = "sentinel",
+    outs = ["sentinel.txt"],
+    cmd = "echo 'generated directory sentinel' > $@",
+)
+
+directory(
+    name = "generated",
+    srcs = [":sentinel"],
+    visibility = ["//cargo_env/tests/directories:__pkg__"],
+)
