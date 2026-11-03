@@ -9,6 +9,9 @@ load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 def _is_file_type(path):
     return type(path) == "File"
 
+def _is_external_or_parent_path(path):
+    return paths.starts_with(path, "external") or paths.starts_with(path, "..")
+
 def _to_runfiles_path(path):
     """Convert execution-root path to runfiles-relative.
 
@@ -16,9 +19,7 @@ def _to_runfiles_path(path):
     - external/foo -> foo for external repositories
     - ../foo -> foo for generated files
     """
-    if paths.starts_with(path, "external") or paths.starts_with(path, ".."):
-        return path.split("/", 1)[-1]
-    return path
+    return path.split("/", 1)[-1] if _is_external_or_parent_path(path) else path
 
 def _make_abs_path(path):
     """Make a path absolute with $RUNFILES_DIR prefix, handling external repos."""
@@ -29,19 +30,30 @@ def _make_abs_path(path):
 
     return paths.join("$RUNFILES_DIR", _to_runfiles_path(path))
 
+def _directory_runfiles_path(directory):
+    """Convert a DirectoryInfo execution-root path to a runfiles-relative path."""
+    path = directory.path
+    if paths.starts_with(path, "bazel-out"):
+        parts = path.split("/")
+        if len(parts) < 4 or parts[0] != "bazel-out" or not parts[1] or parts[2] != "bin":
+            fail("Unsupported generated DirectoryInfo path: {}".format(path))
+        path = "/".join(parts[3:])
+        if not path:
+            fail("Generated DirectoryInfo path has no package-relative path: {}".format(directory.path))
+
+    return _to_runfiles_path(path) if _is_external_or_parent_path(path) else paths.join("_main", path)
+
 def _make_include_arg(dir):
-    return "-I" + _make_abs_path(dir[DirectoryInfo])
+    return "-I" + paths.join("$RUNFILES_DIR", _directory_runfiles_path(dir[DirectoryInfo]))
 
 def _make_custom_env_arg(item):
     env_name, target = item
     if DirectoryInfo in target:
-        path = target[DirectoryInfo].path
-        if not target.label.workspace_root:
-            path = paths.join("_main", path)
+        path = paths.join("$RUNFILES_DIR", _directory_runfiles_path(target[DirectoryInfo]))
     else:
         # Targets without DirectoryInfo use their repository root.
-        path = target.label.workspace_root or "."
-    return "export {}=\"{}\"".format(env_name, _make_abs_path(path))
+        path = _make_abs_path(target.label.workspace_root or ".")
+    return "export {}=\"{}\"".format(env_name, path)
 
 def _make_env_arg(item):
     return "export {}={}".format(item[0], shell.quote(item[1]))

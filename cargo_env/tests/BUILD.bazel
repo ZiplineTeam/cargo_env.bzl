@@ -1,11 +1,36 @@
 load("@bazel_skylib//rules/directory:directory.bzl", "directory")
+load("@bazel_skylib//rules/directory:subdirectory.bzl", "subdirectory")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("//cargo_env:cargo_env.bzl", "cargo_env", "env_wrapper")
 
 directory(
-    name = "test_directory",
+    name = "test_directory_root",
     srcs = ["testdata/directory/sentinel.txt"],
+)
+
+# This source directory target covers a subdirectory of the package-root target.
+subdirectory(
+    name = "test_directory",
+    parent = ":test_directory_root",
+    path = "testdata/directory",
+)
+
+genrule(
+    name = "generated_sentinel",
+    outs = ["generated/sentinel.txt"],
+    cmd = "echo 'generated directory sentinel' > $@",
+)
+
+directory(
+    name = "generated_directory_root",
+    srcs = [":generated_sentinel"],
+)
+
+subdirectory(
+    name = "generated_directory",
+    parent = ":generated_directory_root",
+    path = "generated",
 )
 
 filegroup(
@@ -21,7 +46,14 @@ cargo_env(
     env_directories = {
         "CUSTOM_DIRECTORY": ":test_directory",
         "FILEGROUP_ROOT": ":filegroup_files",
+        "GENERATED_DIRECTORY": ":generated_directory",
+        "SOURCE_DIRECTORY": ":test_directory_root",
     },
+    include_directories = [
+        ":generated_directory",
+        ":test_directory",
+        ":test_directory_root",
+    ],
 )
 
 sh_test(

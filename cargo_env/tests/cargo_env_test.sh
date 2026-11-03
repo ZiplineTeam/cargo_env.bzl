@@ -31,6 +31,8 @@ expected_literal="cost \$5, \"double quotes\", and 'single quotes'"
 
 [[ -d "${CUSTOM_DIRECTORY}" ]]
 [[ -f "${CUSTOM_DIRECTORY}/sentinel.txt" ]]
+[[ -f "${GENERATED_DIRECTORY}/sentinel.txt" ]]
+[[ -f "${SOURCE_DIRECTORY}/testdata/directory/sentinel.txt" ]]
 
 filegroup_file="${RUNFILES_DIR}/_main/cargo_env/tests/testdata/filegroup/sentinel.txt"
 [[ -f "${filegroup_file}" ]]
