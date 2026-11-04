@@ -34,11 +34,10 @@ expected_literal="cost \$5, \"double quotes\", and 'single quotes'"
 [[ -f "${GENERATED_DIRECTORY}/sentinel.txt" ]]
 [[ -f "${SOURCE_DIRECTORY}/testdata/directory/sentinel.txt" ]]
 
-filegroup_file="${RUNFILES_DIR}/_main/cargo_env/tests/testdata/filegroup/sentinel.txt"
+filegroup_file="$(rlocation "$2")"
 [[ -f "${filegroup_file}" ]]
 # shuck: disable=C156
 filegroup_root="${FILEGROUP_ROOT%/.}"
-[[ "${filegroup_root}" -ef "${RUNFILES_DIR}" ]]
 case "${filegroup_file}" in
     "${filegroup_root}"/*) ;;
     *)

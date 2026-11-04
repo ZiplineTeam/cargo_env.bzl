@@ -1,3 +1,4 @@
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@bazel_skylib//rules/directory:directory.bzl", "directory")
 load("@bazel_skylib//rules/directory:subdirectory.bzl", "subdirectory")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
@@ -58,15 +59,21 @@ cargo_env(
 
 sh_test(
     name = "cargo_env_test",
-    srcs = ["cargo_env_test.sh"],
-    args = ["$(rlocationpath :env_under_test)"],
-    data = [":env_under_test"],
+    srcs = [":cargo_env_test_executable"],
+    args = [
+        "$(rlocationpath :env_under_test)",
+        "$(rlocationpath :filegroup_files)",
+    ],
+    data = [
+        ":env_under_test",
+        ":filegroup_files",
+    ],
     deps = ["@bazel_tools//tools/bash/runfiles"],
 )
 
 sh_binary(
     name = "env_wrapper_probe",
-    srcs = ["env_wrapper_probe.sh"],
+    srcs = [":env_wrapper_probe_executable"],
 )
 
 env_wrapper(
@@ -77,8 +84,29 @@ env_wrapper(
 
 sh_test(
     name = "env_wrapper_test",
-    srcs = ["env_wrapper_test.sh"],
+    srcs = [":env_wrapper_test_executable"],
     args = ["$(rlocationpath :env_wrapper_under_test)"],
     data = [":env_wrapper_under_test"],
     deps = ["@bazel_tools//tools/bash/runfiles"],
+)
+
+copy_file(
+    name = "cargo_env_test_executable",
+    src = "cargo_env_test.sh",
+    out = "cargo_env_test_executable.sh",
+    is_executable = True,
+)
+
+copy_file(
+    name = "env_wrapper_test_executable",
+    src = "env_wrapper_test.sh",
+    out = "env_wrapper_test_executable.sh",
+    is_executable = True,
+)
+
+copy_file(
+    name = "env_wrapper_probe_executable",
+    src = "env_wrapper_probe.sh",
+    out = "env_wrapper_probe_executable.sh",
+    is_executable = True,
 )

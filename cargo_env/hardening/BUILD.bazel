@@ -1,0 +1,99 @@
+load("@bazel_lib//:bzl_library.bzl", "bzl_library")
+load("@bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load("//cargo_env:cargo_env.bzl", "cargo_env", "env_wrapper")
+load(":runtime_only.bzl", "runtime_only")
+
+write_file(
+    name = "generated",
+    out = "generated.txt",
+    content = ["generated fixture"],
+)
+
+copy_to_directory(
+    name = "tree",
+    srcs = [":generated"],
+    out = "tree",
+    root_paths = ["."],
+)
+
+filegroup(
+    name = "payloads",
+    srcs = glob(["data/*"]) + [
+        ":generated",
+        ":tree",
+    ],
+)
+
+runtime_only(
+    name = "runtime_data",
+    src = "hidden.asset",
+    link = "linked.asset",
+)
+
+copy_file(
+    name = "probe_executable",
+    src = "probe.sh",
+    out = "probe_executable.sh",
+    is_executable = True,
+)
+
+sh_binary(
+    name = "probe",
+    srcs = [":probe_executable"],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
+)
+
+cargo_env(
+    name = "control_environment",
+    env = {"QUOTED_LITERAL": "cost $5, \"double quotes\", and 'single quotes'"},
+    env_directories = {
+        "FIXTURE_ROOT": ":payloads",
+        "RUNTIME_ROOT": ":runtime_data",
+    },
+    materialize_runtime_inputs = False,
+)
+
+env_wrapper(
+    name = "control",
+    binary = ":probe",
+    environment = ":control_environment",
+)
+
+cargo_env(
+    name = "fixed_environment",
+    env = {"QUOTED_LITERAL": "cost $5, \"double quotes\", and 'single quotes'"},
+    env_directories = {
+        "FIXTURE_ROOT": ":payloads",
+        "RUNTIME_ROOT": ":runtime_data",
+    },
+)
+
+env_wrapper(
+    name = "fixed",
+    binary = ":probe",
+    environment = ":fixed_environment",
+)
+
+copy_file(
+    name = "runtime_test_executable",
+    src = "runtime_test.sh",
+    out = "runtime_test_executable.sh",
+    is_executable = True,
+)
+
+sh_test(
+    name = "runtime_inputs_test",
+    srcs = [":runtime_test_executable"],
+    args = ["$(rlocationpath :fixed)"],
+    data = [":fixed"],
+    deps = ["@bazel_tools//tools/bash/runfiles"],
+)
+
+bzl_library(
+    name = "runtime_only",
+    srcs = ["runtime_only.bzl"],
+)
