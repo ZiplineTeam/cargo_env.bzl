@@ -9,6 +9,8 @@ expected_literal="cost \$5, \"double quotes\", and 'single quotes'"
 [[ -f "${CUSTOM_DIRECTORY}/sentinel.txt" ]]
 [[ -f "${GENERATED_DIRECTORY}/sentinel.txt" ]]
 [[ -f "${SOURCE_DIRECTORY}/testdata/directory/sentinel.txt" ]]
+[[ -f "${GENERATED_FILE}" ]]
+[[ -f "${SOURCE_FILE}" ]]
 
 read -ra include_flags <<< "${CFLAGS}"
 [[ "${#include_flags[@]}" -eq 3 ]]

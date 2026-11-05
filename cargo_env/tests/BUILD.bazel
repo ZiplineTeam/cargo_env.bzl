@@ -49,6 +49,10 @@ cargo_env(
         "GENERATED_DIRECTORY": ":generated_directory",
         "SOURCE_DIRECTORY": ":test_directory_root",
     },
+    env_files = {
+        "GENERATED_FILE": ":generated_sentinel",
+        "SOURCE_FILE": "testdata/directory/sentinel.txt",
+    },
     include_directories = [
         ":generated_directory",
         ":test_directory",
