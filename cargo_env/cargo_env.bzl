@@ -21,13 +21,29 @@ def _to_runfiles_path(path):
     """
     return path.split("/", 1)[-1] if _is_external_or_parent_path(path) else path
 
+def _workspace_runfiles_path(path):
+    """Map a repository-relative path to its runfiles-relative path.
+
+    Main-repository paths get the _main prefix; external and generated paths
+    keep the repository-relative path after their existing prefix is removed.
+
+    Examples:
+    - pkg/include -> _main/pkg/include
+    - external/repo/include -> repo/include
+    - ../repo/include -> repo/include
+    """
+    return _to_runfiles_path(path) if _is_external_or_parent_path(path) else paths.join("_main", path)
+
+def _file_runfiles_path(file):
+    path = file.path if file.is_source else file.short_path
+    return _workspace_runfiles_path(path)
+
 def _make_abs_path(path):
     """Make a path absolute with $RUNFILES_DIR prefix, handling external repos."""
     if _is_file_type(path):
-        path = path.path if path.is_source else path.short_path
-    else:
-        path = getattr(path, "path", path)
+        return paths.join("$RUNFILES_DIR", _file_runfiles_path(path))
 
+    path = getattr(path, "path", path)
     return paths.join("$RUNFILES_DIR", _to_runfiles_path(path))
 
 def _directory_runfiles_path(directory):
@@ -41,10 +57,14 @@ def _directory_runfiles_path(directory):
         if not path:
             fail("Generated DirectoryInfo path has no package-relative path: {}".format(directory.path))
 
-    return _to_runfiles_path(path) if _is_external_or_parent_path(path) else paths.join("_main", path)
+    return _workspace_runfiles_path(path)
 
 def _make_include_arg(dir):
     return "-I" + paths.join("$RUNFILES_DIR", _directory_runfiles_path(dir[DirectoryInfo]))
+
+def _make_export_env_arg(env_name, value):
+    """Format an export statement; value must already be shell-quoted."""
+    return "export {}={}".format(env_name, value)
 
 def _make_custom_env_arg(item):
     env_name, target = item
@@ -53,18 +73,45 @@ def _make_custom_env_arg(item):
     else:
         # Targets without DirectoryInfo use their repository root.
         path = _make_abs_path(target.label.workspace_root or ".")
-    return "export {}=\"{}\"".format(env_name, path)
+    return _make_export_env_arg(env_name, '"{}"'.format(path))
+
+def _get_single_file(target, env_name):
+    files = target[DefaultInfo].files.to_list()
+    if len(files) != 1:
+        fail("env_files entry {} must provide exactly one file, got {}".format(env_name, len(files)))
+    return files[0]
+
+def _make_file_env_arg(item):
+    env_name, target = item
+    path = _make_abs_path(_get_single_file(target, env_name))
+    return _make_export_env_arg(env_name, '"{}"'.format(path))
 
 def _make_env_arg(item):
-    return "export {}={}".format(item[0], shell.quote(item[1]))
+    return _make_export_env_arg(item[0], shell.quote(item[1]))
 
 def _get_optional(optional_file):
     return [optional_file] if optional_file else []
 
+def _check_unique_env_names(envs):
+    seen = {}
+    for source, env in envs:
+        for env_name in env:
+            if env_name in seen:
+                fail("{} is set in both {} and {}".format(env_name, seen[env_name], source))
+            seen[env_name] = source
+
 def _cargo_env_impl(ctx):
-    for env_name in ctx.attr.env:
-        if env_name in ctx.attr.env_directories:
-            fail("{} may not be set in both env and env_directories".format(env_name))
+    _check_unique_env_names([
+        ("env", ctx.attr.env),
+        ("env_directories", ctx.attr.env_directories),
+        ("env_files", ctx.attr.env_files),
+    ])
+
+    env_file_targets = ctx.attr.env_files.values()
+    env_file_outputs = [
+        _get_single_file(target, env_name)
+        for env_name, target in ctx.attr.env_files.items()
+    ]
 
     output = ctx.actions.declare_file("%s.env" % ctx.attr.name)
     substitutions = ctx.actions.template_dict()
@@ -106,6 +153,9 @@ def _cargo_env_impl(ctx):
     ] + [
         _make_custom_env_arg(item)
         for item in ctx.attr.env_directories.items()
+    ] + [
+        _make_file_env_arg(item)
+        for item in ctx.attr.env_files.items()
     ]
     substitutions.add("{CUSTOM_ENV}", "\n".join(custom_env))
 
@@ -117,9 +167,14 @@ def _cargo_env_impl(ctx):
     )
 
     runfiles = ctx.runfiles(
-        files = ctx.files.include_directories + optional_clang + optional_libclang + optional_openssl_dir,
+        files = ctx.files.include_directories + optional_clang + optional_libclang + optional_openssl_dir + env_file_outputs,
+        # TODO: Consider merging default_runfiles for env_directories too.
         transitive_files = depset(transitive = [target.files for target in ctx.attr.env_directories.values()]),
     )
+    runfiles = runfiles.merge_all([
+        target[DefaultInfo].default_runfiles
+        for target in env_file_targets
+    ])
 
     return [DefaultInfo(files = depset([output]), runfiles = runfiles)]
 
@@ -137,6 +192,11 @@ cargo_env = rule(
         "env_directories": attr.string_keyed_label_dict(
             default = {},
             doc = "Map of environment variable names to targets. Uses DirectoryInfo.path when available; otherwise uses the target repository root. Example: {\"MY_INCLUDE_PATH\": \"@my_package//:include_directory\"}",
+        ),
+        "env_files": attr.string_keyed_label_dict(
+            allow_files = True,
+            default = {},
+            doc = "Map of environment variable names to targets that provide exactly one file. The file path is resolved through runfiles.",
         ),
         "include_directories": attr.label_list(
             default = [],
@@ -171,6 +231,9 @@ cargo_env = rule(
         },
         env_directories = {
             "SOME_PACKAGE_PATH": "@some_package//:source_files",
+        },
+        env_files = {
+            "SOME_FILE_PATH": "@some_package//:generated_file",
         },
     )
     ```
