@@ -22,6 +22,14 @@ genrule(
     cmd = "echo 'generated directory sentinel' > $@",
 )
 
+# Keep these files out of env_directories and include_directories so the tests
+# verify env_files makes each file available in the wrapper's runfiles.
+genrule(
+    name = "env_file_generated",
+    outs = ["env_files_generated/only_env_file.txt"],
+    cmd = "echo 'generated env file sentinel' > $@",
+)
+
 directory(
     name = "generated_directory_root",
     srcs = [":generated_sentinel"],
@@ -50,8 +58,8 @@ cargo_env(
         "SOURCE_DIRECTORY": ":test_directory_root",
     },
     env_files = {
-        "GENERATED_FILE": ":generated_sentinel",
-        "SOURCE_FILE": "testdata/directory/sentinel.txt",
+        "GENERATED_FILE": ":env_file_generated",
+        "SOURCE_FILE": "testdata/env_files_source.txt",
     },
     include_directories = [
         ":generated_directory",
