@@ -35,6 +35,9 @@ expected_literal="cost \$5, \"double quotes\", and 'single quotes'"
 [[ -f "${SOURCE_DIRECTORY}/testdata/directory/sentinel.txt" ]]
 [[ -f "${GENERATED_FILE}" ]]
 [[ -f "${SOURCE_FILE}" ]]
+[[ -f "${CLANG_PATH}" ]]
+[[ -f "${LIBCLANG_PATH}" ]]
+[[ -f "${OPENSSL_DIR}" ]]
 
 filegroup_file="${RUNFILES_DIR}/_main/cargo_env/tests/testdata/filegroup/sentinel.txt"
 [[ -f "${filegroup_file}" ]]

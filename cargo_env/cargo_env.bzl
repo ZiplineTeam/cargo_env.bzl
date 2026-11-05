@@ -89,9 +89,6 @@ def _make_file_env_arg(item):
 def _make_env_arg(item):
     return _make_export_env_arg(item[0], shell.quote(item[1]))
 
-def _get_optional(optional_file):
-    return [optional_file] if optional_file else []
-
 def _check_unique_env_names(envs):
     seen = {}
     for source, env in envs:
@@ -101,16 +98,25 @@ def _check_unique_env_names(envs):
             seen[env_name] = source
 
 def _cargo_env_impl(ctx):
+    deprecated_env = {
+        "CLANG_PATH": ctx.attr.clang,
+        "LIBCLANG_PATH": ctx.attr.libclang,
+        "OPENSSL_DIR": ctx.attr.openssl_dir,
+    }
+    deprecated_env = {env_name: target for env_name, target in deprecated_env.items() if target}
+
     _check_unique_env_names([
         ("env", ctx.attr.env),
         ("env_directories", ctx.attr.env_directories),
         ("env_files", ctx.attr.env_files),
+        ("deprecated attributes", deprecated_env),
     ])
 
-    env_file_targets = ctx.attr.env_files.values()
+    env_file_items = ctx.attr.env_files.items() + deprecated_env.items()
+    env_file_targets = [target for _, target in env_file_items]
     env_file_outputs = [
         _get_single_file(target, env_name)
-        for env_name, target in ctx.attr.env_files.items()
+        for env_name, target in env_file_items
     ]
 
     output = ctx.actions.declare_file("%s.env" % ctx.attr.name)
@@ -123,30 +129,6 @@ def _cargo_env_impl(ctx):
         map_each = _make_include_arg,
     )
 
-    optional_clang = _get_optional(ctx.file.clang)
-    substitutions.add_joined(
-        "{CLANG_PATH}",
-        depset(optional_clang),
-        join_with = "",  # dummy
-        map_each = _make_abs_path,
-    )
-
-    optional_libclang = _get_optional(ctx.file.libclang)
-    substitutions.add_joined(
-        "{LIBCLANG_PATH}",
-        depset(optional_libclang),
-        join_with = "",  # dummy
-        map_each = _make_abs_path,
-    )
-
-    optional_openssl_dir = _get_optional(ctx.file.openssl_dir)
-    substitutions.add_joined(
-        "{OPENSSL_DIR}",
-        depset(optional_openssl_dir),
-        join_with = "",  # dummy
-        map_each = _make_abs_path,
-    )
-
     custom_env = [
         _make_env_arg(item)
         for item in ctx.attr.env.items()
@@ -155,7 +137,7 @@ def _cargo_env_impl(ctx):
         for item in ctx.attr.env_directories.items()
     ] + [
         _make_file_env_arg(item)
-        for item in ctx.attr.env_files.items()
+        for item in env_file_items
     ]
     substitutions.add("{CUSTOM_ENV}", "\n".join(custom_env))
 
@@ -167,7 +149,7 @@ def _cargo_env_impl(ctx):
     )
 
     runfiles = ctx.runfiles(
-        files = ctx.files.include_directories + optional_clang + optional_libclang + optional_openssl_dir + env_file_outputs,
+        files = ctx.files.include_directories + env_file_outputs,
         # TODO: Consider merging default_runfiles for env_directories too.
         transitive_files = depset(transitive = [target.files for target in ctx.attr.env_directories.values()]),
     )
@@ -183,7 +165,7 @@ cargo_env = rule(
     attrs = {
         "clang": attr.label(
             allow_single_file = True,
-            doc = "The clang binary.",
+            doc = 'Deprecated: use env_files = {"CLANG_PATH": ...} instead.',
         ),
         "env": attr.string_dict(
             default = {},
@@ -205,11 +187,11 @@ cargo_env = rule(
         ),
         "libclang": attr.label(
             allow_single_file = True,
-            doc = "libclang shared library (libclang.so).",
+            doc = 'Deprecated: use env_files = {"LIBCLANG_PATH": ...} instead.',
         ),
         "openssl_dir": attr.label(
             allow_single_file = True,
-            doc = "The OpenSSL directory.",
+            doc = 'Deprecated: use env_files = {"OPENSSL_DIR": ...} instead.',
         ),
         "_template": attr.label(
             allow_single_file = True,
@@ -222,10 +204,7 @@ cargo_env = rule(
     ```
     cargo_env(
         name = "cargo_env",
-        clang = "@llvm_toolchain_llvm//:bin/clang",
         include_directories = ["@my_library//:headers_directory"],
-        libclang = "@llvm_toolchain_llvm//:lib/libclang.so",
-        openssl_dir = "@openssl//:gen_dir",
         env = {
             "SOME_VALUE": "value",
         },
