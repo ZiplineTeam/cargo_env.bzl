@@ -11,6 +11,9 @@ expected_literal="cost \$5, \"double quotes\", and 'single quotes'"
 [[ -f "${SOURCE_DIRECTORY}/testdata/directory/sentinel.txt" ]]
 [[ -f "${GENERATED_FILE}" ]]
 [[ -f "${SOURCE_FILE}" ]]
+[[ -f "${CLANG_PATH}" ]]
+[[ -f "${LIBCLANG_PATH}" ]]
+[[ -f "${OPENSSL_DIR}" ]]
 
 read -ra include_flags <<< "${CFLAGS}"
 [[ "${#include_flags[@]}" -eq 3 ]]

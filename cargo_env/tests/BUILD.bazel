@@ -48,6 +48,7 @@ filegroup(
 
 cargo_env(
     name = "env_under_test",
+    clang = "testdata/deprecated_attribute.txt",
     env = {
         "CUSTOM_LITERAL": "cost $5, \"double quotes\", and 'single quotes'",
     },
@@ -66,6 +67,8 @@ cargo_env(
         ":test_directory",
         ":test_directory_root",
     ],
+    libclang = "testdata/deprecated_attribute.txt",
+    openssl_dir = "testdata/deprecated_attribute.txt",
 )
 
 sh_test(
