@@ -11,9 +11,6 @@ expected_literal="cost \$5, \"double quotes\", and 'single quotes'"
 [[ -f "${SOURCE_DIRECTORY}/testdata/directory/sentinel.txt" ]]
 [[ -f "${GENERATED_FILE}" ]]
 [[ -f "${SOURCE_FILE}" ]]
-[[ -f "${CLANG_PATH}" ]]
-[[ -f "${LIBCLANG_PATH}" ]]
-[[ -f "${OPENSSL_DIR}" ]]
 
 # This generated dependency is supplied only by env_directories default runfiles.
 [[ -f "${FILEGROUP_ROOT}/_main/cargo_env/tests/runtime_only/sentinel.txt" ]]

@@ -98,22 +98,13 @@ def _check_unique_env_names(envs):
             seen[env_name] = source
 
 def _cargo_env_impl(ctx):
-    deprecated_env = {
-        "CLANG_PATH": ctx.attr.clang,
-        "LIBCLANG_PATH": ctx.attr.libclang,
-        "OPENSSL_DIR": ctx.attr.openssl_dir,
-    }
-    deprecated_env = {env_name: target for env_name, target in deprecated_env.items() if target}
-
     _check_unique_env_names([
         ("env", ctx.attr.env),
         ("env_directories", ctx.attr.env_directories),
         ("env_files", ctx.attr.env_files),
-        ("deprecated attributes", deprecated_env),
     ])
 
-    env_file_items = ctx.attr.env_files.items() + deprecated_env.items()
-    env_file_targets = [target for _, target in env_file_items]
+    env_file_items = ctx.attr.env_files.items()
     env_file_outputs = [
         _get_single_file(target, env_name)
         for env_name, target in env_file_items
@@ -157,7 +148,7 @@ def _cargo_env_impl(ctx):
     # for example a filegroup's data. Preserve those files and runfiles mappings.
     runfiles = runfiles.merge_all([
         target[DefaultInfo].default_runfiles
-        for target in env_file_targets + ctx.attr.env_directories.values()
+        for target in ctx.attr.env_files.values() + ctx.attr.env_directories.values()
     ])
 
     return [DefaultInfo(files = depset([output]), runfiles = runfiles)]
@@ -165,10 +156,6 @@ def _cargo_env_impl(ctx):
 cargo_env = rule(
     implementation = _cargo_env_impl,
     attrs = {
-        "clang": attr.label(
-            allow_single_file = True,
-            doc = 'Deprecated: use env_files = {"CLANG_PATH": ...} instead.',
-        ),
         "env": attr.string_dict(
             default = {},
             doc = "Map of environment variable names to literal values.",
@@ -186,14 +173,6 @@ cargo_env = rule(
             default = [],
             providers = [DirectoryInfo],
             doc = "Include directories for C++ to find.",
-        ),
-        "libclang": attr.label(
-            allow_single_file = True,
-            doc = 'Deprecated: use env_files = {"LIBCLANG_PATH": ...} instead.',
-        ),
-        "openssl_dir": attr.label(
-            allow_single_file = True,
-            doc = 'Deprecated: use env_files = {"OPENSSL_DIR": ...} instead.',
         ),
         "_template": attr.label(
             allow_single_file = True,
