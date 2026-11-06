@@ -44,11 +44,10 @@ expected_literal="cost \$5, \"double quotes\", and 'single quotes'"
 
 filegroup_file="${RUNFILES_DIR}/_main/cargo_env/tests/testdata/filegroup/sentinel.txt"
 [[ -f "${filegroup_file}" ]]
-# shuck: disable=C156
-filegroup_root="${FILEGROUP_ROOT%/.}"
-[[ "${filegroup_root}" -ef "${RUNFILES_DIR}" ]]
+filegroup_runfiles_root="${FILEGROUP_ROOT%/.}"
+[[ "${filegroup_runfiles_root}" -ef "${RUNFILES_DIR}" ]]
 case "${filegroup_file}" in
-    "${filegroup_root}"/*) ;;
+    "${filegroup_runfiles_root}"/*) ;;
     *)
         echo >&2 "filegroup file is not beneath FILEGROUP_ROOT: ${filegroup_file}"
         exit 1
