@@ -150,12 +150,14 @@ def _cargo_env_impl(ctx):
 
     runfiles = ctx.runfiles(
         files = ctx.files.include_directories + env_file_outputs,
-        # TODO: Consider merging default_runfiles for env_directories too.
         transitive_files = depset(transitive = [target.files for target in ctx.attr.env_directories.values()]),
     )
+
+    # Directory targets may carry runtime dependencies outside DefaultInfo.files,
+    # for example a filegroup's data. Preserve those files and runfiles mappings.
     runfiles = runfiles.merge_all([
         target[DefaultInfo].default_runfiles
-        for target in env_file_targets
+        for target in env_file_targets + ctx.attr.env_directories.values()
     ])
 
     return [DefaultInfo(files = depset([output]), runfiles = runfiles)]
@@ -173,7 +175,7 @@ cargo_env = rule(
         ),
         "env_directories": attr.string_keyed_label_dict(
             default = {},
-            doc = "Map of environment variable names to targets. Uses DirectoryInfo.path when available; otherwise uses the target repository root. Example: {\"MY_INCLUDE_PATH\": \"@my_package//:include_directory\"}",
+            doc = "Map of environment variable names to targets. Uses DirectoryInfo.path when available; otherwise uses the target repository root. Includes the target files and default runfiles. Example: {\"MY_INCLUDE_PATH\": \"@my_package//:include_directory\"}",
         ),
         "env_files": attr.string_keyed_label_dict(
             allow_files = True,
