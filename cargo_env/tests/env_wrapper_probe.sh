@@ -15,6 +15,9 @@ expected_literal="cost \$5, \"double quotes\", and 'single quotes'"
 [[ -f "${LIBCLANG_PATH}" ]]
 [[ -f "${OPENSSL_DIR}" ]]
 
+# This generated dependency is supplied only by env_directories default runfiles.
+[[ -f "${FILEGROUP_ROOT}/_main/cargo_env/tests/runtime_only/sentinel.txt" ]]
+
 read -ra include_flags <<< "${CFLAGS}"
 [[ "${#include_flags[@]}" -eq 3 ]]
 

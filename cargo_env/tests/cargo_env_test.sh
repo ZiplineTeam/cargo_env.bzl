@@ -39,6 +39,9 @@ expected_literal="cost \$5, \"double quotes\", and 'single quotes'"
 [[ -f "${LIBCLANG_PATH}" ]]
 [[ -f "${OPENSSL_DIR}" ]]
 
+# This generated dependency is supplied only by env_directories default runfiles.
+[[ -f "${FILEGROUP_ROOT}/_main/cargo_env/tests/runtime_only/sentinel.txt" ]]
+
 filegroup_file="${RUNFILES_DIR}/_main/cargo_env/tests/testdata/filegroup/sentinel.txt"
 [[ -f "${filegroup_file}" ]]
 # shuck: disable=C156

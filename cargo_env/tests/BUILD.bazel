@@ -41,9 +41,18 @@ subdirectory(
     path = "generated",
 )
 
+# This generated file is available only through filegroup_files' runfiles.
+# It must be built and propagated even though it is absent from that target's files.
+genrule(
+    name = "directory_runtime_sentinel",
+    outs = ["runtime_only/sentinel.txt"],
+    cmd = "echo 'directory runtime sentinel' > $@",
+)
+
 filegroup(
     name = "filegroup_files",
     srcs = ["testdata/filegroup/sentinel.txt"],
+    data = [":directory_runtime_sentinel"],
 )
 
 cargo_env(
