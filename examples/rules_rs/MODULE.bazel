@@ -11,16 +11,16 @@ local_path_override(
 
 # keep-sorted start
 bazel_dep(name = "bazel_env.bzl", version = "0.10.0")
-bazel_dep(name = "llvm", version = "0.8.25")
-bazel_dep(name = "openssl", version = "4.0.1.bcr.1")
-bazel_dep(name = "rules_rs", version = "0.2.1")
+bazel_dep(name = "llvm", version = "0.8.27")
+bazel_dep(name = "openssl", version = "4.0.3.bcr.1")
+bazel_dep(name = "rules_rs", version = "0.2.4")
 bazel_dep(name = "zstd", version = "1.5.7.bcr.3")
 # keep-sorted end
 
 toolchains = use_extension("@rules_rs//rs/toolchains:module_extension.bzl", "toolchains")
 toolchains.toolchain(
     edition = "2024",
-    version = "1.99.1",
+    version = "1.100.0",
 )
 use_repo(toolchains, "default_rust_toolchains")
 
@@ -35,6 +35,8 @@ crate.from_cargo(
     name = "crates",
     cargo_lock = "//:Cargo.lock",
     cargo_toml = "//:Cargo.toml",
+    incompatible_no_root_alias_targets = True,
+    incompatible_no_root_crate_data = True,
     platform_triples = [
         "aarch64-apple-darwin",
         "aarch64-unknown-linux-gnu",
