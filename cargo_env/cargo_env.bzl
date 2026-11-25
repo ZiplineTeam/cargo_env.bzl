@@ -2,6 +2,7 @@
 
 load("@bazel_lib//lib:expand_template.bzl", "expand_template")
 load("@bazel_lib//lib:paths.bzl", "to_rlocation_path")
+load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules/directory:providers.bzl", "DirectoryInfo")
@@ -95,15 +96,6 @@ def _cargo_env_impl(ctx):
     }
 
     output = ctx.actions.declare_file("%s.env" % ctx.attr.name)
-    substitutions = ctx.actions.template_dict()
-
-    substitutions.add_joined(
-        "{INCLUDES}",
-        depset(ctx.attr.include_directories),
-        join_with = " ",
-        map_each = _make_include_arg,
-    )
-
     custom_env = [
         _make_env_arg(item)
         for item in ctx.attr.env.items()
@@ -114,6 +106,15 @@ def _cargo_env_impl(ctx):
         _make_file_env_arg(ctx, env_name, file)
         for env_name, file in env_files.items()
     ]
+
+    rendered_flags = " ".join(collections.uniq([
+        _make_include_arg(directory)
+        for directory in ctx.attr.include_directories
+    ]))
+    substitutions = ctx.actions.template_dict()
+
+    # Expand include flags before inserting custom values that may contain {INCLUDES}.
+    substitutions.add("{INCLUDES}", rendered_flags)
     substitutions.add("{CUSTOM_ENV}", "\n".join(custom_env))
 
     ctx.actions.expand_template(

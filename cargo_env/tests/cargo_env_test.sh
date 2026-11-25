@@ -26,7 +26,7 @@ environment_file="$(rlocation "$1")"
 # shellcheck source=/dev/null
 source "${environment_file}"
 
-expected_literal="cost \$5, \"double quotes\", and 'single quotes'"
+expected_literal="cost \$5, \"double quotes\", 'single quotes', and {INCLUDES}"
 [[ "${CUSTOM_LITERAL}" == "${expected_literal}" ]]
 
 [[ -d "${CUSTOM_DIRECTORY}" ]]

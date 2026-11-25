@@ -16,6 +16,12 @@ subdirectory(
     path = "testdata/directory",
 )
 
+subdirectory(
+    name = "duplicate_test_directory",
+    parent = ":test_directory_root",
+    path = "testdata/directory",
+)
+
 genrule(
     name = "generated_sentinel",
     outs = ["generated/sentinel.txt"],
@@ -58,7 +64,7 @@ filegroup(
 cargo_env(
     name = "env_under_test",
     env = {
-        "CUSTOM_LITERAL": "cost $5, \"double quotes\", and 'single quotes'",
+        "CUSTOM_LITERAL": "cost $5, \"double quotes\", 'single quotes', and {INCLUDES}",
     },
     env_directories = {
         "CUSTOM_DIRECTORY": ":test_directory",
@@ -74,6 +80,7 @@ cargo_env(
         ":generated_directory",
         ":test_directory",
         ":test_directory_root",
+        ":duplicate_test_directory",
     ],
 )
 

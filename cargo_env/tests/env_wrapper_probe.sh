@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-expected_literal="cost \$5, \"double quotes\", and 'single quotes'"
+expected_literal="cost \$5, \"double quotes\", 'single quotes', and {INCLUDES}"
 [[ "${CUSTOM_LITERAL}" == "${expected_literal}" ]]
 [[ -d "${CUSTOM_DIRECTORY}" ]]
 [[ -f "${CUSTOM_DIRECTORY}/sentinel.txt" ]]
@@ -15,23 +15,9 @@ expected_literal="cost \$5, \"double quotes\", and 'single quotes'"
 # This generated dependency is supplied only by env_directories default runfiles.
 [[ -f "${FILEGROUP_ROOT}/_main/cargo_env/tests/runtime_only/sentinel.txt" ]]
 
-read -ra include_flags <<< "${CFLAGS}"
-[[ "${#include_flags[@]}" -eq 3 ]]
-
-has_include_directory() {
-    local expected_directory="$1"
-    local flag
-    for flag in "${include_flags[@]}"; do
-        if [[ "${flag}" == "-I${expected_directory}" ]]; then
-            return 0
-        fi
-    done
-    return 1
-}
-
-for directory in "${CUSTOM_DIRECTORY}" "${GENERATED_DIRECTORY}" "${SOURCE_DIRECTORY}"; do
-    has_include_directory "${directory}"
-done
+expected_flags="-I${GENERATED_DIRECTORY} -I${CUSTOM_DIRECTORY} -I${SOURCE_DIRECTORY}"
+[[ "${CFLAGS}" == "${expected_flags}" ]]
+[[ "${CXXFLAGS}" == "${expected_flags}" ]]
 
 [[ "$#" -eq 2 ]]
 [[ "$1" == "argument with spaces" ]]
