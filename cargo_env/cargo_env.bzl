@@ -186,9 +186,7 @@ cargo_env = rule(
 )
 
 def env_wrapper(name, binary, environment, visibility = None, **kwargs):
-    # This is unfortunate, but `rules_shell` still uses the native
-    # implementation of `sh_binary` which does not support `RunEnvironmentInfo`.
-    # So we need to generate this wrapper.
+    # Embed both runfiles paths so the wrapper also works outside bazel run.
     wrapped_name = "_{}_wrapped".format(name)
     expand_template(
         name = wrapped_name,
@@ -206,7 +204,7 @@ def env_wrapper(name, binary, environment, visibility = None, **kwargs):
         name = name,
         srcs = [wrapped_name],
         data = [binary, environment],
-        deps = ["@bazel_tools//tools/bash/runfiles"],
+        use_bash_launcher = True,
         visibility = visibility,
         **kwargs
     )

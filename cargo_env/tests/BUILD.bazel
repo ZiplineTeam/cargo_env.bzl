@@ -89,7 +89,7 @@ sh_test(
     srcs = ["cargo_env_test.sh"],
     args = ["$(rlocationpath :env_under_test)"],
     data = [":env_under_test"],
-    deps = ["@bazel_tools//tools/bash/runfiles"],
+    use_bash_launcher = True,
 )
 
 sh_binary(
@@ -108,5 +108,5 @@ sh_test(
     srcs = ["env_wrapper_test.sh"],
     args = ["$(rlocationpath :env_wrapper_under_test)"],
     data = [":env_wrapper_under_test"],
-    deps = ["@bazel_tools//tools/bash/runfiles"],
+    use_bash_launcher = True,
 )
