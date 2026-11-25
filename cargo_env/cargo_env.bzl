@@ -1,13 +1,11 @@
 """Generates a Cargo environment file and wrapper scripts for cargo builds using dependencies provided by Bazel."""
 
 load("@bazel_lib//lib:expand_template.bzl", "expand_template")
+load("@bazel_lib//lib:paths.bzl", "to_rlocation_path")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules/directory:providers.bzl", "DirectoryInfo")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
-
-def _is_file_type(path):
-    return type(path) == "File"
 
 def _is_external_or_parent_path(path):
     return paths.starts_with(path, "external") or paths.starts_with(path, "..")
@@ -33,18 +31,6 @@ def _workspace_runfiles_path(path):
     - ../repo/include -> repo/include
     """
     return _to_runfiles_path(path) if _is_external_or_parent_path(path) else paths.join("_main", path)
-
-def _file_runfiles_path(file):
-    path = file.path if file.is_source else file.short_path
-    return _workspace_runfiles_path(path)
-
-def _make_abs_path(path):
-    """Make a path absolute with $RUNFILES_DIR prefix, handling external repos."""
-    if _is_file_type(path):
-        return paths.join("$RUNFILES_DIR", _file_runfiles_path(path))
-
-    path = getattr(path, "path", path)
-    return paths.join("$RUNFILES_DIR", _to_runfiles_path(path))
 
 def _directory_runfiles_path(directory):
     """Convert a DirectoryInfo execution-root path to a runfiles-relative path."""
@@ -72,7 +58,7 @@ def _make_custom_env_arg(item):
         path = paths.join("$RUNFILES_DIR", _directory_runfiles_path(target[DirectoryInfo]))
     else:
         # Targets without DirectoryInfo use their repository root.
-        path = _make_abs_path(target.label.workspace_root or ".")
+        path = paths.join("$RUNFILES_DIR", _to_runfiles_path(target.label.workspace_root or "."))
     return _make_export_env_arg(env_name, '"{}"'.format(path))
 
 def _get_single_file(target, env_name):
@@ -81,9 +67,8 @@ def _get_single_file(target, env_name):
         fail("env_files entry {} must provide exactly one file, got {}".format(env_name, len(files)))
     return files[0]
 
-def _make_file_env_arg(item):
-    env_name, target = item
-    path = _make_abs_path(_get_single_file(target, env_name))
+def _make_file_env_arg(ctx, env_name, file):
+    path = paths.join("$RUNFILES_DIR", to_rlocation_path(ctx, file))
     return _make_export_env_arg(env_name, '"{}"'.format(path))
 
 def _make_env_arg(item):
@@ -104,11 +89,10 @@ def _cargo_env_impl(ctx):
         ("env_files", ctx.attr.env_files),
     ])
 
-    env_file_items = ctx.attr.env_files.items()
-    env_file_outputs = [
-        _get_single_file(target, env_name)
-        for env_name, target in env_file_items
-    ]
+    env_files = {
+        env_name: _get_single_file(target, env_name)
+        for env_name, target in ctx.attr.env_files.items()
+    }
 
     output = ctx.actions.declare_file("%s.env" % ctx.attr.name)
     substitutions = ctx.actions.template_dict()
@@ -127,8 +111,8 @@ def _cargo_env_impl(ctx):
         _make_custom_env_arg(item)
         for item in ctx.attr.env_directories.items()
     ] + [
-        _make_file_env_arg(item)
-        for item in env_file_items
+        _make_file_env_arg(ctx, env_name, file)
+        for env_name, file in env_files.items()
     ]
     substitutions.add("{CUSTOM_ENV}", "\n".join(custom_env))
 
@@ -140,7 +124,7 @@ def _cargo_env_impl(ctx):
     )
 
     runfiles = ctx.runfiles(
-        files = ctx.files.include_directories + env_file_outputs,
+        files = ctx.files.include_directories + env_files.values(),
         transitive_files = depset(transitive = [target.files for target in ctx.attr.env_directories.values()]),
     )
 
