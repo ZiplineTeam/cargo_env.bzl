@@ -20,7 +20,7 @@
         "ghcr.io/devcontainers/features/git:1": {},
         "ghcr.io/devcontainers-community/features/bazel:1": {
             "bazelisk_version": "v1.30.0",
-            "buildifier_version": "v10.1.0"
+            "buildifier_version": "v10.2.0"
         },
         "ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
             "upgradePackages": true,

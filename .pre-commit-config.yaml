@@ -85,11 +85,11 @@ repos:
       - id: buildifier
         args:
           - --version
-          - "v10.1.0"
+          - "v10.2.0"
       - id: buildifier-lint
         args:
           - --version
-          - "v10.1.0"
+          - "v10.2.0"
   - repo: https://github.com/hofbi/dev-tools
     rev: 2.0.0
     hooks:
