@@ -10,6 +10,7 @@ cargo_env(
         # "LIBCLANG_PATH": "@llvm_toolchain_llvm//:lib/libclang.so",
         "OPENSSL_DIR": "@openssl//:gen_dir",
     },
+    include_directories = ["@zstd"],
     tags = ["manual"],
 )
 

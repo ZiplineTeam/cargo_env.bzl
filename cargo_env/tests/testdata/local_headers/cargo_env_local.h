@@ -1,0 +1,1 @@
+#define CARGO_ENV_LOCAL 1
