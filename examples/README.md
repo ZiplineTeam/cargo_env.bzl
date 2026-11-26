@@ -27,3 +27,11 @@ cargo test
 > [!NOTE]
 > We don't have `cargo` not any of the rust dependencies installed in the system.
 > All of these dependencies are provided by Bazel and `bazel_env` and `cargo_env` make them available to `cargo`.
+
+## Cargo Environment Configuration
+
+Both projects use `cargo_env` to give Cargo build scripts access to Bazel dependencies.
+They set `CLANG_PATH` and `OPENSSL_DIR` with `env_files` and provide zstd headers with `include_directories`.
+The `env_wrapper` rule applies that environment to `cargo` and `rustc`.
+
+[rules_rust configuration](./rules_rust/tools/BUILD.bazel) · [rules_rs configuration](./rules_rs/tools/BUILD.bazel)

@@ -1,0 +1,24 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+genrule(
+    name = "generate_header",
+    outs = ["generated/cargo_env_generated.h"],
+    cmd = "echo '#define CARGO_ENV_GENERATED 1' > $@",
+)
+
+cc_library(
+    name = "virtual_headers",
+    hdrs = [":generate_header"],
+    features = ["external_include_paths"],
+    include_prefix = "probe",
+    strip_include_prefix = "generated",
+)
+
+cc_library(
+    name = "headers",
+    hdrs = ["include/cargo_env_source.h"],
+    features = ["external_include_paths"],
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [":virtual_headers"],
+)

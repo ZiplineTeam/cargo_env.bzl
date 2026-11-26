@@ -1,5 +1,6 @@
 load("@bazel_skylib//rules/directory:directory.bzl", "directory")
 load("@bazel_skylib//rules/directory:subdirectory.bzl", "subdirectory")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("//cargo_env:cargo_env.bzl", "cargo_env", "env_wrapper")
@@ -81,6 +82,8 @@ cargo_env(
         ":test_directory",
         ":test_directory_root",
         ":duplicate_test_directory",
+        "@cargo_env_test_headers//:headers",
+        ":local_headers",
     ],
 )
 
@@ -109,4 +112,11 @@ sh_test(
     args = ["$(rlocationpath :env_wrapper_under_test)"],
     data = [":env_wrapper_under_test"],
     use_bash_launcher = True,
+)
+
+cc_library(
+    name = "local_headers",
+    hdrs = ["testdata/local_headers/cargo_env_local.h"],
+    features = ["system_include_paths"],
+    includes = ["testdata/local_headers"],
 )

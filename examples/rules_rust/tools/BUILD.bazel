@@ -6,10 +6,9 @@ cargo_env(
     name = "cargo_env",
     env_files = {
         "CLANG_PATH": "@llvm//tools:clang",
-        # TODO: libclang does not work on Mac yet.
-        # "LIBCLANG_PATH": "@llvm_toolchain_llvm//:lib/libclang.so",
         "OPENSSL_DIR": "@openssl//:gen_dir",
     },
+    include_directories = ["@zstd"],
     tags = ["manual"],
 )
 

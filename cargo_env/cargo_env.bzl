@@ -6,51 +6,68 @@ load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules/directory:providers.bzl", "DirectoryInfo")
+load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 
-def _is_external_or_parent_path(path):
-    return paths.starts_with(path, "external") or paths.starts_with(path, "..")
-
-def _to_runfiles_path(path):
-    """Convert execution-root path to runfiles-relative.
-
-    Examples:
-    - external/foo -> foo for external repositories
-    - ../foo -> foo for generated files
-    """
-    return path.split("/", 1)[-1] if _is_external_or_parent_path(path) else path
+# Collect each kind of search path across all targets. Both system and external
+# paths use -isystem, so their relative order matters when names collide.
+_INCLUDE_FLAGS = [
+    ("quote_includes", "-iquote"),
+    ("includes", "-I"),
+    ("system_includes", "-isystem"),
+    ("framework_includes", "-F"),
+    ("external_includes", "-isystem"),
+]
 
 def _workspace_runfiles_path(path):
-    """Map a repository-relative path to its runfiles-relative path.
+    """Map a normalized path to its runfiles-relative path.
 
-    Main-repository paths get the _main prefix; external and generated paths
-    keep the repository-relative path after their existing prefix is removed.
+    Main-repository paths get the _main prefix. External paths already
+    include their repository name after the layout prefix.
 
     Examples:
     - pkg/include -> _main/pkg/include
     - external/repo/include -> repo/include
     - ../repo/include -> repo/include
     """
-    return _to_runfiles_path(path) if _is_external_or_parent_path(path) else paths.join("_main", path)
+    if paths.starts_with(path, "external") or paths.starts_with(path, ".."):
+        return path.split("/", 1)[-1]
+    return paths.join("_main", path)
 
-def _directory_runfiles_path(directory):
-    """Convert a DirectoryInfo execution-root path to a runfiles-relative path."""
-    path = directory.path
-    if paths.starts_with(path, "bazel-out"):
-        parts = path.split("/")
-        if len(parts) < 4 or parts[0] != "bazel-out" or not parts[1] or parts[2] != "bin":
-            fail("Unsupported generated DirectoryInfo path: {}".format(path))
-        path = "/".join(parts[3:])
-        if not path:
-            fail("Generated DirectoryInfo path has no package-relative path: {}".format(directory.path))
+def _directory_runfiles_path(path):
+    """Convert an execution-root directory to a runfiles-relative path."""
+    normalized_path = paths.normalize(path)
+    if paths.starts_with(normalized_path, "bazel-out"):
+        parts = normalized_path.split("/")
+        if len(parts) < 3 or parts[2] not in ["bin", "genfiles"]:
+            fail("Unsupported generated directory path: {}".format(path))
+        normalized_path = "/".join(parts[3:]) or "."
 
-    return _workspace_runfiles_path(path)
+    return _workspace_runfiles_path(normalized_path)
 
 def _shell_runfiles_path(path):
     return '"${RUNFILES_DIR}/"' + shell.quote(path)
 
-def _make_include_arg(dir):
-    return "-I" + paths.join("$RUNFILES_DIR", _directory_runfiles_path(dir[DirectoryInfo]))
+def _include_flag(prefix, path):
+    if paths.is_absolute(path):
+        return shell.quote(prefix + path)
+    return shell.quote(prefix) + _shell_runfiles_path(_directory_runfiles_path(path))
+
+def _include_context(target):
+    if DirectoryInfo in target:
+        return cc_common.create_compilation_context(
+            headers = target.files,
+            includes = depset([target[DirectoryInfo].path]),
+        )
+    return target[CcInfo].compilation_context
+
+def _make_include_args(context):
+    return collections.uniq([
+        _include_flag(prefix, path)
+        for field, prefix in _INCLUDE_FLAGS
+        for path in getattr(context, field).to_list()
+    ])
 
 def _make_export_env_arg(env_name, value):
     """Format an export statement; value must already be shell-quoted."""
@@ -59,7 +76,7 @@ def _make_export_env_arg(env_name, value):
 def _make_custom_env_arg(item):
     env_name, target = item
     if DirectoryInfo in target:
-        path = _directory_runfiles_path(target[DirectoryInfo])
+        path = _directory_runfiles_path(target[DirectoryInfo].path)
     else:
         # Targets without DirectoryInfo use their repository root.
         path = target.label.repo_name or "."
@@ -98,6 +115,14 @@ def _cargo_env_impl(ctx):
     }
 
     output = ctx.actions.declare_file("%s.env" % ctx.attr.name)
+    include_context = cc_common.merge_compilation_contexts(compilation_contexts = [
+        _include_context(target)
+        for target in ctx.attr.include_directories
+    ])
+
+    # Keep the separators inside the shell assignment value.
+    include_flags = shell.quote(" ").join(_make_include_args(include_context))
+
     custom_env = [
         _make_env_arg(item)
         for item in ctx.attr.env.items()
@@ -108,12 +133,6 @@ def _cargo_env_impl(ctx):
         _make_file_env_arg(ctx, env_name, file)
         for env_name, file in env_files.items()
     ]
-
-    rendered_flags = " ".join(collections.uniq([
-        _make_include_arg(directory)
-        for directory in ctx.attr.include_directories
-    ]))
-    include_flags = '"{}"'.format(rendered_flags)
 
     ctx.actions.write(
         output = output,
@@ -127,8 +146,8 @@ def _cargo_env_impl(ctx):
     )
 
     runfiles = ctx.runfiles(
-        files = ctx.files.include_directories + env_files.values(),
-        transitive_files = depset(transitive = [target.files for target in ctx.attr.env_directories.values()]),
+        files = env_files.values(),
+        transitive_files = depset(transitive = [include_context.headers] + [target.files for target in ctx.attr.env_directories.values()]),
     )
 
     # Directory targets may carry runtime dependencies outside DefaultInfo.files,
@@ -158,8 +177,8 @@ cargo_env = rule(
         ),
         "include_directories": attr.label_list(
             default = [],
-            providers = [DirectoryInfo],
-            doc = "Include directories for C++ to find.",
+            providers = [[DirectoryInfo], [CcInfo]],
+            doc = "Directory targets or C++ library targets supplying headers and compiler include paths.",
         ),
     },
     doc = """Generates a Cargo environment file for cargo builds.
