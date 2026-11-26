@@ -32,8 +32,6 @@ case "${filegroup_file}" in
         ;;
 esac
 
-# shellcheck source=/dev/null
-source "$(rlocation "$2")"
 [[ "${CFLAGS}" == "${CXXFLAGS}" ]]
 
 external_headers=("${RUNFILES_DIR}"/*/include/cargo_env_source.h)

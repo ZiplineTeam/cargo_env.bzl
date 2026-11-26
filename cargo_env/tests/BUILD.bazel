@@ -64,6 +64,7 @@ filegroup(
 
 cargo_env(
     name = "env_under_test",
+    testonly = True,
     env = {
         "CUSTOM_LITERAL": "cost $5, \"double quotes\", 'single quotes', and {INCLUDES}",
     },
@@ -82,20 +83,16 @@ cargo_env(
         ":test_directory",
         ":test_directory_root",
         ":duplicate_test_directory",
+        "@cargo_env_test_headers//:headers",
+        ":local_headers",
     ],
 )
 
 sh_test(
     name = "cargo_env_test",
     srcs = ["cargo_env_test.sh"],
-    args = [
-        "$(rlocationpath :env_under_test)",
-        "$(rlocationpath :cc_env_under_test)",
-    ],
-    data = [
-        ":cc_env_under_test",
-        ":env_under_test",
-    ],
+    args = ["$(rlocationpath :env_under_test)"],
+    data = [":env_under_test"],
     use_bash_launcher = True,
 )
 
@@ -106,6 +103,7 @@ sh_binary(
 
 env_wrapper(
     name = "env_wrapper_under_test",
+    testonly = True,
     binary = ":env_wrapper_probe",
     environment = ":env_under_test",
 )
@@ -123,14 +121,4 @@ cc_library(
     hdrs = ["testdata/local_headers/cargo_env_local.h"],
     features = ["system_include_paths"],
     includes = ["testdata/local_headers"],
-)
-
-cargo_env(
-    name = "cc_env_under_test",
-    testonly = True,
-    include_directories = [
-        "@cargo_env_test_headers//:headers",
-        ":local_headers",
-        ":test_directory",
-    ],
 )
