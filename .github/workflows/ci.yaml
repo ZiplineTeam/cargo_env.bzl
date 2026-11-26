@@ -53,6 +53,9 @@ jobs:
             bazel run --config=ci //tools:gazelle.check
           fi
           bazel test --config=ci //...
+          if [ "$MATRIX_FOLDERS" != "." ]; then
+            bazel run --config=ci //tools:cargo -- test
+          fi
         env:
           MATRIX_BAZELVERSION: ${{ matrix.bazelversion }}
           ORIGINAL_BAZELVERSION: ${{ steps.bazel-version.outputs.original }}
