@@ -64,7 +64,6 @@ filegroup(
 
 cargo_env(
     name = "env_under_test",
-    testonly = True,
     env = {
         "CUSTOM_LITERAL": "cost $5, \"double quotes\", 'single quotes', and {INCLUDES}",
     },
@@ -103,7 +102,6 @@ sh_binary(
 
 env_wrapper(
     name = "env_wrapper_under_test",
-    testonly = True,
     binary = ":env_wrapper_probe",
     environment = ":env_under_test",
 )
