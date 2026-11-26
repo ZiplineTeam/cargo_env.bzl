@@ -46,6 +46,9 @@ def _directory_runfiles_path(directory):
 
     return _workspace_runfiles_path(path)
 
+def _shell_runfiles_path(path):
+    return '"${RUNFILES_DIR}/"' + shell.quote(path)
+
 def _make_include_arg(dir):
     return "-I" + paths.join("$RUNFILES_DIR", _directory_runfiles_path(dir[DirectoryInfo]))
 
@@ -56,11 +59,11 @@ def _make_export_env_arg(env_name, value):
 def _make_custom_env_arg(item):
     env_name, target = item
     if DirectoryInfo in target:
-        path = paths.join("$RUNFILES_DIR", _directory_runfiles_path(target[DirectoryInfo]))
+        path = _directory_runfiles_path(target[DirectoryInfo])
     else:
         # Targets without DirectoryInfo use their repository root.
-        path = paths.join("$RUNFILES_DIR", _to_runfiles_path(target.label.workspace_root or "."))
-    return _make_export_env_arg(env_name, '"{}"'.format(path))
+        path = target.label.repo_name or "."
+    return _make_export_env_arg(env_name, _shell_runfiles_path(path))
 
 def _get_single_file(target, env_name):
     files = target[DefaultInfo].files.to_list()
@@ -69,8 +72,7 @@ def _get_single_file(target, env_name):
     return files[0]
 
 def _make_file_env_arg(ctx, env_name, file):
-    path = paths.join("$RUNFILES_DIR", to_rlocation_path(ctx, file))
-    return _make_export_env_arg(env_name, '"{}"'.format(path))
+    return _make_export_env_arg(env_name, _shell_runfiles_path(to_rlocation_path(ctx, file)))
 
 def _make_env_arg(item):
     return _make_export_env_arg(item[0], shell.quote(item[1]))
@@ -111,16 +113,16 @@ def _cargo_env_impl(ctx):
         _make_include_arg(directory)
         for directory in ctx.attr.include_directories
     ]))
-    substitutions = ctx.actions.template_dict()
+    include_flags = '"{}"'.format(rendered_flags)
 
-    # Expand include flags before inserting custom values that may contain {INCLUDES}.
-    substitutions.add("{INCLUDES}", rendered_flags)
-    substitutions.add("{CUSTOM_ENV}", "\n".join(custom_env))
-
-    ctx.actions.expand_template(
+    ctx.actions.write(
         output = output,
-        template = ctx.file._template,
-        computed_substitutions = substitutions,
+        content = "\n".join([
+            _make_export_env_arg("CFLAGS", include_flags),
+            _make_export_env_arg("CXXFLAGS", include_flags),
+            "\n".join(custom_env),
+            "",
+        ]),
         is_executable = True,
     )
 
@@ -158,10 +160,6 @@ cargo_env = rule(
             default = [],
             providers = [DirectoryInfo],
             doc = "Include directories for C++ to find.",
-        ),
-        "_template": attr.label(
-            allow_single_file = True,
-            default = ":template.env",
         ),
     },
     doc = """Generates a Cargo environment file for cargo builds.
